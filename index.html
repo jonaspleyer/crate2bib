@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="module">
+            import init, { create_bib_string } from './pkg/crate2bib.js';
+            async function run() {
+                await init();
+            }
+            run();
+    </script>
+        <style>
+            h1, h2, h3, h4, h5 {
+                color: rgb(20, 20, 20);
+                font-family: mono;
+            }
+
+            .main {
+                width: min(100%, 800pt);
+                margin-left: auto;
+                margin-right: auto;
+                text-align: center;
+                background-color: rgb(250, 240, 190);
+            }
+
+            input[type=text] {
+                width: 80%;
+                padding: 12px 12px;
+                margin: 8px 0;
+                box-sizing: border-box;
+            }
+
+            input[type=text]:focus {
+                border: 3px solid #555;
+            }
+        </style>
+    <head>
+    <body>
+        <div class="main">
+            <h2>crate2bib</h2>
+            crate name
+            <form onSubmit="return false">
+                <input type="text" name="crate_name" value="serde" required><br>
+                <input 
+                    type="submit" 
+                    value="Create Citation" 
+                    onClick="result.innerText = create_bib_string(crate_name.value)">
+                <label id="result"></label>
+            </form>
+        </div>
+    </body>
+<html>

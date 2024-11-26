@@ -1,0 +1,14 @@
+[package]
+name = "crate2bib"
+authors = ["Jonas Pleyer<jonas.pleyer@fdm.uni-freiburg.de"]
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+reqwest = { version = "0.12.9" }
+wasm-bindgen = "0.2.95"
+wasm-bindgen-futures = "0.4.45"
+web-sys = { version = "0.3.72", features = ["Document", "Element", "HtmlElement", "Node", "Window"] }
