@@ -1,0 +1,47 @@
+on: [push, pull_request]
+
+name: Build Website
+
+jobs:
+  Build-Site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
+          lfs: 'false'
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
+
+      - name: Build Crate
+        run: wasm-pack build --target web --release
+
+      - name: Upload Files
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  Deploy:
+    needs: Build-Site
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Github Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
