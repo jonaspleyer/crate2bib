@@ -15,7 +15,6 @@ struct Args {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     let bibtex = crate2bib::get_bibtex(&args.crate_name, &args.semver)?;
-    println!("Generated bibtex:");
     println!("{bibtex}");
     Ok(())
 }
