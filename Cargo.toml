@@ -4,5 +4,17 @@ members = [
     "crate2bib",
     "crate2bib-app",
     "crate2bib-cli",
-    "crate2bib-py",
+    "crate2bib-py", "crate2bib-app", "crate2bib-app",
 ]
+
+[profile]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
