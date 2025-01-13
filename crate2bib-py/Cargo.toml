@@ -3,4 +3,11 @@ name = "crate2bib-py"
 version = "0.1.0"
 edition = "2021"
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "crate2bib_py"
+crate-type = ["cdylib"]
+
 [dependencies]
+pyo3 = "0.23.3"
+crate2bib = { path = "../crate2bib" }

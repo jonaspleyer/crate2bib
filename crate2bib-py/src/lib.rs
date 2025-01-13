@@ -1,14 +1,16 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use pyo3::prelude::*;
+
+/// Formats the sum of two numbers as string.
+#[pyfunction]
+fn get_bibtex(crate_name: String, semver: String) -> PyResult<String> {
+    let bibtex = crate2bib::get_bibtex(&crate_name, &semver)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("{e}")))?;
+    Ok(format!("{}", bibtex))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+/// A Python module implemented in Rust.
+#[pymodule]
+fn crate2bib_py(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(get_bibtex, m)?)?;
+    Ok(())
 }
