@@ -15,9 +15,8 @@ impl std::fmt::Display for BibTex {
         writeln!(f, "@software {{{}", self.key)?;
         writeln!(f, "    author = {}", self.author)?;
         writeln!(f, "    title = {}", self.title)?;
-        match &self.url {
-            Some(u) => writeln!(f, "    url = {u}")?,
-            None => (),
+        if let Some(u) = &self.url {
+            writeln!(f, "    url = {u}")?;
         };
         writeln!(
             f,
@@ -97,8 +96,7 @@ mod tests {
     fn access_crates_io() -> Result<(), Box<dyn std::error::Error>> {
         let bib_entry = get_bibtex("serde", "1.0.217")?;
         println!("{}", bib_entry);
-        let expected = "\
-@software {serde2024
+        let expected = "@software {serde2024
     author = David Tolnay
     title = serde 1.0.217: A generic serialization/deserialization framework
     url = https://github.com/serde-rs/serde
