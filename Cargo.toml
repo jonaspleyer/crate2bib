@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+    "crate2bib",
+    "crate2bib-app",
+    "crate2bib-cli",
+    "crate2bib-py",
+]
