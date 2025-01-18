@@ -1,3 +1,5 @@
+use chrono::Datelike;
+
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug)]
 pub struct BibTex {
@@ -53,10 +55,13 @@ impl std::error::Error for VersionError {
     }
 }
 
-pub fn get_bibtex(crate_name: &str, version: &str) -> Result<BibTex, Box<dyn std::error::Error>> {
-    use crates_io_api::SyncClient;
-    let client = SyncClient::new("my-user-agent", std::time::Duration::from_millis(1000))?;
-    let info = client.get_crate(crate_name)?;
+pub async fn get_bibtex(
+    crate_name: &str,
+    version: &str,
+) -> Result<BibTex, Box<dyn std::error::Error>> {
+    use crates_io_api::AsyncClient;
+    let client = AsyncClient::new("my-user-agent", web_time::Duration::from_millis(1000))?;
+    let info = client.get_crate(crate_name).await?;
     let mut obtained_versions = info
         .versions
         .iter()
@@ -72,10 +77,10 @@ pub fn get_bibtex(crate_name: &str, version: &str) -> Result<BibTex, Box<dyn std
         .ok_or(VersionError(format!("Could not find {}", version)))?;
     let found_version = info.versions[index].clone();
     Ok(BibTex {
-        key: format!("{}{}", crate_name, info.crate_data.updated_at.format("%Y")),
+        key: format!("{}{}", crate_name, info.crate_data.updated_at.year()),
         author: found_version
             .published_by
-            .map_or_else(|| format!(""), |x| x.name.unwrap_or(x.login)),
+            .map_or_else(|| "".to_owned(), |x| x.name.unwrap_or(x.login)),
         title: info
             .crate_data
             .description
