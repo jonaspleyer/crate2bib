@@ -9,5 +9,6 @@ name = "crate2bib_py"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = "0.23.3"
+pyo3 = "0.23"
 crate2bib = { path = "../crate2bib" }
+pyo3-async-runtimes = { version = "0.23", features = ["tokio-runtime"] }
