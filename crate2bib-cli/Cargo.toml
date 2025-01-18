@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+async-std = { version = "1.13", features = ["attributes", "tokio1"] }
 clap = { version = "4.5.26", features = ["derive"] }
 crate2bib = { version = "0.1", path = "../crate2bib/"}
-tokio = { version = "1.43.0", features = ["macros"] }
