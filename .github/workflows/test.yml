@@ -9,7 +9,7 @@ on:
         type: string
 
 jobs:
-  reusable_workflow_job:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -28,7 +28,7 @@ jobs:
         run: cargo check
 
       - name: DocTest
-        run: cargo test --doc
+        run: cargo test --workspace --exclude crate2bib-py --doc
 
       - name: Test
-        run: cargo test
+        run: cargo test --workspace --exclude crate2bib-py
