@@ -3,7 +3,7 @@
 # App (Project) Name
 name = "crate2bib-app"
 
-out_dir = "docs"
+# out_dir = "docs"
 
 [web.app]
 
