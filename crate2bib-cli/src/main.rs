@@ -12,9 +12,10 @@ struct Args {
     semver: String,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let bibtex = crate2bib::get_bibtex(&args.crate_name, &args.semver)?;
+    let bibtex = crate2bib::get_bibtex(&args.crate_name, &args.semver).await?;
     println!("{bibtex}");
     Ok(())
 }
