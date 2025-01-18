@@ -78,6 +78,14 @@ pub async fn get_bibtex(
         .find(|x| version.matches(&x.1))
         .ok_or(VersionError(format!("Could not find {}", version)))?;
     let found_version = info.versions[index].clone();
+
+    // TODO look into the repository and see if we can find any of the following:
+    // 1. file: CITATION.cff/CITATION
+    // 2. file: README.md/README containing any of the following words:
+    //      1. citation
+    //      2. cite
+    //      3. reference
+
     Ok(BibTex {
         key: format!("{}{}", crate_name, info.crate_data.updated_at.year()),
         author: found_version
