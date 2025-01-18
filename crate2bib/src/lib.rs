@@ -15,18 +15,20 @@ impl std::fmt::Display for BibTex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Opens the bibtex entry
         writeln!(f, "@software {{{}", self.key)?;
-        writeln!(f, "    author = {}", self.author)?;
-        writeln!(f, "    title = {}", self.title)?;
+        writeln!(f, "    author = {{{}}},", self.author)?;
+        writeln!(f, "    title = {{{}}},", self.title)?;
         if let Some(u) = &self.url {
-            writeln!(f, "    url = {u}")?;
+            writeln!(f, "    url = {{{u}}},")?;
         };
         writeln!(
             f,
-            "    date = {}",
-            chrono::DateTime::format(&self.date, "%Y/%m/%d")
+            "    date = {{{:4.0}-{:02}-{:02}}},",
+            self.date.year(),
+            self.date.month(),
+            self.date.day(),
         )?;
         // Closes the entry
-        writeln!(f, "}}")?;
+        write!(f, "}}")?;
         Ok(())
     }
 }
@@ -85,7 +87,7 @@ pub async fn get_bibtex(
             .crate_data
             .description
             .map_or(crate_name.to_owned(), |x| {
-                format!("{} {}: {}", crate_name, found_version_semver, x)
+                format!("{} ({}): {}", crate_name, found_version_semver, x)
             }),
         url: info.crate_data.repository,
         version: found_version_semver,
@@ -97,17 +99,17 @@ pub async fn get_bibtex(
 mod tests {
     use super::*;
 
-    #[test]
-    fn access_crates_io() -> Result<(), Box<dyn std::error::Error>> {
-        let bib_entry = get_bibtex("serde", "1.0.217")?;
+    #[tokio::test]
+    async fn access_crates_io() -> Result<(), Box<dyn std::error::Error>> {
+        let bib_entry = get_bibtex("serde", "1.0.217").await?;
         println!("{}", bib_entry);
-        let expected = "@software {serde2024
-    author = David Tolnay
-    title = serde 1.0.217: A generic serialization/deserialization framework
-    url = https://github.com/serde-rs/serde
-    date = 2024/12/27
-}
-";
+        let expected = "\
+@software {serde2024
+    author = {David Tolnay},
+    title = {serde (1.0.217): A generic serialization/deserialization framework},
+    url = {https://github.com/serde-rs/serde},
+    date = {2024-12-27},
+}";
         assert_eq!(format!("{}", bib_entry), expected);
         Ok(())
     }
