@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 crates_io_api = { git = "https://github.com/jonaspleyer/crates-io-api", ref = "c021a59f3443fb5b9b1625104d048e0cfa2e65b7" }
-tokio = { version = "1.43.0", features = ["macros"] }
 semver = { version = "1.0.24", features = [ "serde" ] }
 serde_json = "1.0.135"
 serde = { version = "1.0", optional = true, features = ["derive"] }
