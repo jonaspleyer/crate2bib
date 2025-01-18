@@ -1,0 +1,72 @@
+:root {
+    --color-bg: #222630;
+    --color-text: #FFF;
+    --color-text-heading: #B74E58;
+    --color-text-code: #BBC3D4;
+    --color-bg-code: #4C566A;
+}
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px;
+}
+
+h1, h2, h3, h4, h5 {
+    color: var(--color-text-heading);
+}
+
+#hero {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#hero h1 {margin-bottom: 0}
+#hero h2 {margin-top: 0}
+
+#hero input {
+    border-radius: 0.5em;
+    padding: 0.5em;
+}
+
+#hero #response, #notes {
+    color: var(--color-text-code);
+    width: 80%;
+    height: 15em;
+    margin-top: 1em;
+    padding: 1em;
+    border: 1px white;
+    background: var(--color-bg-code);
+}
+
+#links {
+    width: 400px;
+    text-align: left;
+    font-size: x-large;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+#links a {
+    color: white;
+    text-decoration: none;
+    margin-top: 20px;
+    margin: 10px 0px;
+    border: white 1px solid;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#links a:hover {
+    background-color: #1f1f1f;
+    cursor: pointer;
+}
+
+#header {
+    max-width: 1200px;
+}
