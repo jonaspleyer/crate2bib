@@ -8,8 +8,6 @@ members = [
     "crate2bib-py", "crate2bib-app", "crate2bib-app",
 ]
 
-[profile]
-
 [profile.wasm-dev]
 inherits = "dev"
 opt-level = 1
