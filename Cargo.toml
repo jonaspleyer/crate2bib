@@ -5,7 +5,7 @@ members = [
     "crate2bib",
     "crate2bib-app",
     "crate2bib-cli",
-    "crate2bib-py", "crate2bib-app", "crate2bib-app",
+    "crate2bib-py"
 ]
 
 [profile.wasm-dev]
