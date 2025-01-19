@@ -1,16 +1,11 @@
 [application]
-
-# App (Project) Name
-name = "crate2bib-app"
-
-# out_dir = "docs"
+name = "crate2bib"
+out_dir = "dist"
+asset_dir = "assets"
 
 [web.app]
-
-# HTML title tag content
-title = "crate2bib-app"
-
-# base_path = "https://github.com/jonaspleyer/crate2bib"
+title = "crate2bib"
+# base_path = "https://github.com/jonaspleyer/crate2bib/"
 
 # include `assets` in web platform
 [web.resource]
