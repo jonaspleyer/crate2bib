@@ -7,4 +7,4 @@ index_on_404 = true
 
 [web.app]
 title = "crate2bib"
-base_path = "jonaspleyer/crate2bib"
+base_path = "crate2bib"
