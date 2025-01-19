@@ -1,41 +1,15 @@
 name: Build WebApp
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  build:
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
+  build-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: cargo-bins/cargo-binstall@main
-      - run: cargo binstall dioxus-cli --no-confirm
-      - run: dx build --release -p crate2bib-app
-
-      - name: Configure Github Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Github Pages artifact
-        id: deployment
-        uses: actions/upload-pages-artifact@v3
+      - name: "Dioxus Deploy"
+        uses: DioxusLabs/deploy-action@0.1.2
         with:
-          path: target/dx/crate2bib-app/release/web/public
-
-  deploy:
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github.pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to github pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          rootPath: "crate2bib-app"
