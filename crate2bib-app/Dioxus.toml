@@ -1,23 +1,10 @@
 [application]
 name = "crate2bib"
-out_dir = "dist"
-asset_dir = "assets"
+# asset_dir = "assets"
+
+[web.watchter]
+index_on_404 = true
 
 [web.app]
 title = "crate2bib"
-# base_path = "https://github.com/jonaspleyer/crate2bib/"
-
-# include `assets` in web platform
-[web.resource]
-
-# Additional CSS style files
-style = []
-
-# Additional JavaScript files
-script = []
-
-[web.resource.dev]
-
-# Javascript code file
-# serve: [dev-server] only
-script = []
+base_path = "jonaspleyer/crate2bib"
