@@ -104,14 +104,10 @@ async fn search_citation_cff(
         // https://github.com/OWNER/REPO
         // -> https://api-github.com/repos/OWNER/REPO
         let segments: Vec<_> = repo.split("github.com/").collect();
-        println!("\n\n");
-        println!("{segments:?}");
         if let Some(tail) = segments.get(1) {
             let segments2: Vec<_> = tail.split("/").collect();
-            println!("{segments2:?}");
             let owner = segments2[0];
             let repo = segments2[1];
-            println!("{owner} {repo}");
             let request_url = format!("https://api.github.com/repos/{owner}/{repo}");
             let response = client
                 .get(request_url)
@@ -210,6 +206,7 @@ pub async fn get_biblatex(
     let found_version = info.versions[index].clone();
 
     if let Some(bibtex) = search_citation_cff(&client1, &info.crate_data.repository).await? {
+        println!("Returning new citation");
         return Ok((bibtex, EntryOrigin::CitationCff));
     }
 
@@ -293,8 +290,11 @@ mod tests {
 
     #[tokio::test]
     async fn find_citation_cff() -> Result<(), Box<dyn std::error::Error>> {
-        let bib_entry = get_biblatex("cellular-raza", "0.1", Some("crate2bib-testing")).await?;
-        assert_eq!(bib_entry.1, EntryOrigin::CitationCff);
+        let (bib_entry, origin) =
+            get_biblatex("cellular-raza", "0.1", Some("crate2bib-testing")).await?;
+        println!("{bib_entry}");
+        assert_eq!(origin, EntryOrigin::CitationCff);
+        panic!();
         Ok(())
     }
 }
