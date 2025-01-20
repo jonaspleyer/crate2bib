@@ -60,10 +60,16 @@ impl std::error::Error for VersionError {
 pub async fn get_bibtex(
     crate_name: &str,
     version: &str,
+    user_agent: Option<&str>,
 ) -> Result<BibTex, Box<dyn std::error::Error>> {
     use crates_io_api::AsyncClient;
     use reqwest::header::*;
-    let headers = HeaderMap::new();
+    let mut headers = HeaderMap::new();
+
+    if let Some(ua) = user_agent {
+        headers.insert(USER_AGENT, HeaderValue::from_str(ua)?);
+    }
+
     let client = reqwest::Client::builder()
         .default_headers(headers)
         .build()
@@ -115,7 +121,7 @@ mod tests {
 
     #[tokio::test]
     async fn access_crates_io() -> Result<(), Box<dyn std::error::Error>> {
-        let bib_entry = get_bibtex("serde", "1.0.217").await?;
+        let bib_entry = get_bibtex("serde", "1.0.217", Some("crate2bib-testing")).await?;
         println!("{}", bib_entry);
         let expected = "\
 @software {serde2024
