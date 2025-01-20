@@ -29,7 +29,7 @@ pub struct BibLaTeX {
     pub date: chrono::DateTime<chrono::Utc>,
 }
 
-impl std::fmt::Display for BibTex {
+impl std::fmt::Display for BibLaTeX {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Writes the biblatex entry
         writeln!(f, "@software {{{}", self.key)?;
@@ -80,11 +80,11 @@ impl std::error::Error for VersionError {
 /// ## Note
 /// crates.io requires the specification of a user-agent
 /// but this may yield errors when calling from a static website due to CORS.
-pub async fn get_bibtex(
+pub async fn get_biblatex(
     crate_name: &str,
     version: &str,
     user_agent: Option<&str>,
-) -> Result<BibTex, Box<dyn std::error::Error>> {
+) -> Result<BibLaTeX, Box<dyn std::error::Error>> {
     use crates_io_api::AsyncClient;
     use reqwest::header::*;
     let mut headers = HeaderMap::new();
@@ -121,7 +121,7 @@ pub async fn get_bibtex(
     //      2. cite
     //      3. reference
 
-    Ok(BibTex {
+    Ok(BibLaTex {
         key: format!("{}{}", crate_name, info.crate_data.updated_at.year()),
         author: found_version
             .published_by
@@ -144,8 +144,7 @@ mod tests {
 
     #[tokio::test]
     async fn access_crates_io() -> Result<(), Box<dyn std::error::Error>> {
-        let bib_entry = get_bibtex("serde", "1.0.217", Some("crate2bib-testing")).await?;
-        println!("{}", bib_entry);
+        let bib_entry = get_biblatex("serde", "1.0.217", Some("crate2bib-testing")).await?;
         let expected = "\
 @software {serde2024
     author = {David Tolnay},
