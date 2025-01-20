@@ -22,37 +22,40 @@ pub fn Hero() -> Element {
         version.set(format!("{ve}"));
         let bib = crate2bib::get_bibtex(&crate_name.to_string(), &version.to_string()).await;
         match bib {
-            Ok(v) => bibtex.set(format!("{v}")),
-            Err(e) => bibtex.set(format!("{e}")),
+            Ok(v) => {
+                bibtex.set(format!("{v}"));
+                messages.push(Success(Props {
+                    message: format!("SUCCESS: {crate_name}"),
+                }));
+            }
+            Err(e) => {
+                messages.push(Error(Props {
+                    message: format!("ERROR: {e}"),
+                }));
+            }
         }
     };
 
     rsx! {
-        div {
-            id: "hero",
-            h1 { "crate2Bib" },
-            h2 { "Create a BibTeX entry from a given crate and version number." },
-            form {
-                onsubmit: move |event| update_form(event),
-                input {
-                    name: "crate_name",
-                    value: crate_name,
-                },
-                input {
-                    name: "version",
-                    value: version,
-                    margin_left: "0.5em",
-                },
-                input {
-                    margin_left: "0.5em",
-                    value: "Generate",
-                    r#type: "submit"
-                },
+        div { id: "hero",
+            h1 { "crate2Bib" }
+            h3 { "Create a BibTeX entry from a given crate and version number." }
+            form { onsubmit: move |event| update_form(event),
+                input { name: "crate_name", r#type: "text", value: crate_name }
+                input { name: "version", r#type: "text", value: version }
+                input { value: "Generate", r#type: "submit" }
             }
-            h2 { "BibTeX Citation" },
-            textarea {
-                id: "response",
-                value: bibtex
+            h2 { "BibTeX Citation" }
+            textarea { id: "response", value: bibtex }
+            p {
+                "The "
+                a { href: "https://github.com/jonaspleyer/crate2bib", "crate2bib" }
+                " crate scans "
+                a { href: "https://crates.io/", "crates.io" }
+                " for possible candidates and then searches for any "
+                code { "CITATION.cff" }
+                " files inside the respective repository of the candidate."
+            }
             }
         }
     }

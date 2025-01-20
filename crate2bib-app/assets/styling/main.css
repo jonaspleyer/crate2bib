@@ -1,16 +1,51 @@
 :root {
+    /* --color-bg: white;
+    --color-text: black;
+    --color-text-heading: #222;
+    --color-text-code: #545B5A;
+    --color-text-footer: black;
+    --color-bg-code: #BCCBC9;
+    --color-bg-footer: #BCCBC9;
+    --color-edge: #111;
+}
+[data-theme="dark"] {*/
+/* See https://github.com/AlexvZyl/nordic.nvim/blob/main/assets/palette.png */
     --color-bg: #222630;
     --color-text: #FFF;
     --color-text-heading: #B74E58;
     --color-text-code: #BBC3D4;
+    --color-text-footer: #C5727A;
+    --color-link: #D08770;
     --color-bg-code: #4C566A;
+    --color-bg-footer: #3B4252;
+    --color-edge: #D08770;
+
+    /* Admonitions */
+    --color-warning: #CB775D;
+    --color-error: #B74E58;
+    --color-success: #97B67C;
+    --color-note: #88C0D0;
 }
 
 body {
+    margin: 0pt;
+    padding: 0pt;
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
+
+    /* To align everything in center */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#main {
+    margin: 0pt;
+    padding: 0pt;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: 1fr auto;
 }
 
 h1, h2, h3, h4, h5 {
@@ -18,19 +53,51 @@ h1, h2, h3, h4, h5 {
 }
 
 #hero {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    align: middle;
+    width: min(500pt, 80%);
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #hero h1 {margin-bottom: 0}
 #hero h2 {margin-top: 0}
 
 #hero input {
-    border-radius: 0.5em;
+    margin: 0.5em;
     padding: 0.5em;
+    border: 1px solid var(--color-edge);
+    border-radius: 0pt;
+    color: var(--color-text);
+    background-color: var(--color-bg-code);
+}
+
+#hero input[type=submit]:hover {
+    background-color: var(--color-bg-footer);
+}
+
+#hero input[type=submit]:active {
+    background-color: var(--color-bg);
+}
+
+a {
+    color: var(--color-link);
+}
+
+code {
+    padding: 1pt;
+    padding-left: 2pt;
+    padding-right: 2pt;
+    background-color: var(--color-bg-code);
+}
+
+footer {
+    min-height: 20px;
+    margin: 0pt;
+    margin-top: 1em;
+    padding: 1em;
+    width: 100%-2em;
+    color: var(--color-text-footer);
+    background-color: var(--color-bg-footer);
 }
 
 #hero #response, #notes {
@@ -43,28 +110,13 @@ h1, h2, h3, h4, h5 {
     background: var(--color-bg-code);
 }
 
-#links {
-    width: 400px;
-    text-align: left;
-    font-size: x-large;
-    color: white;
-    display: flex;
-    flex-direction: column;
-}
-
-#links a {
-    color: white;
-    text-decoration: none;
-    margin-top: 20px;
-    margin: 10px 0px;
-    border: white 1px solid;
-    border-radius: 5px;
-    padding: 10px;
-}
-
-#links a:hover {
-    background-color: #1f1f1f;
-    cursor: pointer;
+#footer-box {
+    width: min(500pt, 80%);
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid white;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
 }
 
 #header {
