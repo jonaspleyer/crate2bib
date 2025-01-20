@@ -9,6 +9,7 @@
 #![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+use citation_cff::CitationCff;
 #[cfg(feature = "pyo3")]
 use pyo3::prelude::*;
 
@@ -31,6 +32,15 @@ pub struct BibLaTeX {
     pub version: semver::Version,
     /// The time at which this version was published
     pub date: chrono::DateTime<chrono::Utc>,
+}
+
+impl BibLaTeX {
+    /// Converts a [CitationCff] file to [BibLaTeX]
+    pub fn from_citation_cff(
+        citation_cff: &CitationCff,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        todo!()
+    }
 }
 
 impl std::fmt::Display for BibLaTeX {
@@ -111,12 +121,38 @@ async fn search_citation_cff(
                 .await?;
             let default_branch = response
                 .get("default_branch")
-                .ok_or(serde_json::Error::custom("could not find default branch"))?;
-            // println!("{response:#}");
-            println!("{default_branch}");
-            println!("\n\n");
+                .ok_or(serde_json::Error::custom("could not find default branch"))?
+                .to_string()
+                .replace("\"", "");
+
+            let check_files = vec![
+                "CITATION.cff",
+                "CITATION",
+                "Citation.cff",
+                "Citation",
+                "citation.cff",
+                "citation",
+            ];
+            let request_url_base = format!(
+                "https://raw.githubusercontent.com/\
+                {owner}/\
+                {repo}/\
+                refs/heads/\
+                {default_branch}"
+            );
+            let requests = check_files.into_iter().map(|f| {
+                let rq = format!("{request_url_base}/{f}");
+                client.get(rq).send()
+            });
+            for response in requests {
+                let response = response.await?.text().await?;
+                if !response.to_lowercase().contains("404: not found") {
+                    return Ok(Some(BibLaTeX::from_citation_cff(&CitationCff::parse(
+                        &response,
+                    )?)?));
+                }
+            }
         }
-        // panic!();
     }
     Ok(None)
 }
