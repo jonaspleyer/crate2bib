@@ -6,23 +6,32 @@
 //! 2. Search repository for possible `CITATION` files
 //! 3. Generate BibLaTeX entry from known properties and return the Origin of this information via
 //!    [EntryOrigin]
+#![deny(missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 use chrono::Datelike;
 use serde::{de::Error, Deserialize, Serialize};
 
+/// A fully specified BibLaTeX entry generated from a crate hostedn on [crates.io](https://crates.io)
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct BibLaTeX {
+    /// BibLaTeX citation key which can be used in LaTeX `\cite{key}`.
     pub key: String,
+    /// All authors of the crate.
     pub author: String,
+    /// The title of the crate is a combination of the name, version and description of the crate
     pub title: String,
+    /// Contains the repository where the crate is hosted
     pub url: Option<String>,
+    /// Version which was automatically found by [semver]
     pub version: semver::Version,
+    /// The time at which this version was published
     pub date: chrono::DateTime<chrono::Utc>,
 }
 
 impl std::fmt::Display for BibTex {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // Opens the bibtex entry
+        // Writes the biblatex entry
         writeln!(f, "@software {{{}", self.key)?;
         writeln!(f, "    author = {{{}}},", self.author)?;
         writeln!(f, "    title = {{{}}},", self.title)?;
@@ -66,6 +75,11 @@ impl std::error::Error for VersionError {
     }
 }
 
+/// Returns a [BibLaTeX] entry for the searched crate.
+///
+/// ## Note
+/// crates.io requires the specification of a user-agent
+/// but this may yield errors when calling from a static website due to CORS.
 pub async fn get_bibtex(
     crate_name: &str,
     version: &str,
