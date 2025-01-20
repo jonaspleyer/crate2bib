@@ -37,7 +37,7 @@ pub fn Note(props: Props) -> Element {
 pub fn Hero() -> Element {
     let mut crate_name = use_signal(|| "cellular-raza".to_string());
     let mut version = use_signal(|| "0.1".to_string());
-    let mut bibtex = use_signal(|| "__empty__".to_string());
+    let mut biblatex = use_signal(|| "__empty__".to_string());
 
     let mut messages = use_signal(|| {
         vec![
@@ -61,10 +61,11 @@ pub fn Hero() -> Element {
         let ve = &values.get("version").unwrap_or(&default)[0];
         crate_name.set(format!("{cn}"));
         version.set(format!("{ve}"));
-        let bib = crate2bib::get_bibtex(&crate_name.to_string(), &version.to_string()).await;
+        let bib =
+            crate2bib::get_biblatex(&crate_name.to_string(), &version.to_string(), None).await;
         match bib {
-            Ok(v) => {
-                bibtex.set(format!("{v}"));
+            Ok((v, _)) => {
+                biblatex.set(format!("{v}"));
                 messages.push(Success(Props {
                     message: format!("SUCCESS: {crate_name}"),
                 }));
@@ -80,14 +81,14 @@ pub fn Hero() -> Element {
     rsx! {
         div { id: "hero",
             h1 { "crate2Bib" }
-            h3 { "Create a BibTeX entry from a given crate and version number." }
+            h3 { "Create a BibLaTeX entry from a given crate and version number." }
             form { onsubmit: move |event| update_form(event),
                 input { name: "crate_name", r#type: "text", value: crate_name }
                 input { name: "version", r#type: "text", value: version }
                 input { value: "Generate", r#type: "submit" }
             }
-            h2 { "BibTeX Citation" }
-            textarea { id: "response", value: bibtex }
+            h2 { "BibLaTeX Citation" }
+            textarea { id: "response", value: biblatex }
             p {
                 "The "
                 a { href: "https://github.com/jonaspleyer/crate2bib", "crate2bib" }
