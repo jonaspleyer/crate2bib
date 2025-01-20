@@ -39,15 +39,7 @@ pub fn Hero() -> Element {
     let mut version = use_signal(|| "0.1".to_string());
     let mut biblatex = use_signal(|| "__empty__".to_string());
 
-    let mut messages = use_signal(|| {
-        vec![
-        Warning(
-            Props {
-                message: "Due to CORS Restrictions, this site is currently not supported in the Firefox browser.".to_owned()
-            }
-        ),
-    ]
-    });
+    let mut messages = use_signal(|| vec![]);
 
     let mut update_form = move |event: Event<FormData>| async move {
         let default = vec!["__nothing__".to_string()];
