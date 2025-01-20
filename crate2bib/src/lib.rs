@@ -75,6 +75,58 @@ impl std::error::Error for VersionError {
     }
 }
 
+async fn search_citation_cff(
+    client: &reqwest::Client,
+    repository: &Option<String>,
+) -> Result<Option<BibLaTeX>, Box<dyn std::error::Error>> {
+    if let Some(repo) = repository {
+        // Check if this is Github
+        if !repo.contains("github") {
+            return Ok(None);
+        }
+
+        // Make API Call
+        // See: https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#get-a-repository
+        // https://github.com/OWNER/REPO
+        // -> https://api-github.com/repos/OWNER/REPO
+        let segments: Vec<_> = repo.split("github.com/").collect();
+        println!("\n\n");
+        println!("{segments:?}");
+        if let Some(tail) = segments.get(1) {
+            let segments2: Vec<_> = tail.split("/").collect();
+            println!("{segments2:?}");
+            let owner = segments2[0];
+            let repo = segments2[1];
+            println!("{owner} {repo}");
+            let request_url = format!("https://api.github.com/repos/{owner}/{repo}");
+            let response = client
+                .get(request_url)
+                .send()
+                .await?
+                .json::<serde_json::Value>()
+                .await?;
+            let default_branch = response
+                .get("default_branch")
+                .ok_or(serde_json::Error::custom("could not find default branch"))?;
+            // println!("{response:#}");
+            println!("{default_branch}");
+            println!("\n\n");
+        }
+        // panic!();
+    }
+    Ok(None)
+}
+
+/// Describes how the BibLaTeX entry was obtainedj
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "pyo3", pyclass)]
+pub enum EntryOrigin {
+    /// Generated from data found on [crates.io](https://crates.io)
+    Generated = 0,
+    /// Found citation file in repository
+    CitationCff = 1,
+}
+
 /// Returns a [BibLaTeX] entry for the searched crate.
 ///
 /// ## Note
@@ -84,7 +136,7 @@ pub async fn get_biblatex(
     crate_name: &str,
     version: &str,
     user_agent: Option<&str>,
-) -> Result<BibLaTeX, Box<dyn std::error::Error>> {
+) -> Result<(BibLaTeX, EntryOrigin), Box<dyn std::error::Error>> {
     use crates_io_api::AsyncClient;
     use reqwest::header::*;
     let mut headers = HeaderMap::new();
@@ -93,11 +145,12 @@ pub async fn get_biblatex(
         headers.insert(USER_AGENT, HeaderValue::from_str(ua)?);
     }
 
-    let client = reqwest::Client::builder()
+    let client1 = reqwest::Client::builder()
         .default_headers(headers)
         .build()
         .unwrap();
-    let client = AsyncClient::with_http_client(client, web_time::Duration::from_millis(1000));
+    let client =
+        AsyncClient::with_http_client(client1.clone(), web_time::Duration::from_millis(1000));
     let info = client.get_crate(crate_name).await?;
     let mut obtained_versions = info
         .versions
@@ -114,27 +167,27 @@ pub async fn get_biblatex(
         .ok_or(VersionError(format!("Could not find {}", version)))?;
     let found_version = info.versions[index].clone();
 
-    // TODO look into the repository and see if we can find any of the following:
-    // 1. file: CITATION.cff/CITATION
-    // 2. file: README.md/README containing any of the following words:
-    //      1. citation
-    //      2. cite
-    //      3. reference
+    if let Some(bibtex) = search_citation_cff(&client1, &info.crate_data.repository).await? {
+        return Ok((bibtex, EntryOrigin::CitationCff));
+    }
 
-    Ok(BibLaTex {
-        key: format!("{}{}", crate_name, info.crate_data.updated_at.year()),
-        author: found_version
-            .published_by
-            .map_or_else(|| "".to_owned(), |x| x.name.unwrap_or(x.login)),
-        title: info
-            .crate_data
-            .description
-            .map_or(crate_name.to_owned(), |x| {
-                format!("{} ({}): {}", crate_name, found_version_semver, x)
-            }),
-        url: info.crate_data.repository,
-        version: found_version_semver,
-        date: found_version.updated_at,
+    Ok((
+        BibLaTeX {
+            key: format!("{}{}", crate_name, info.crate_data.updated_at.year()),
+            author: found_version
+                .published_by
+                .map_or_else(|| "".to_owned(), |x| x.name.unwrap_or(x.login)),
+            title: info
+                .crate_data
+                .description
+                .map_or(crate_name.to_owned(), |x| {
+                    format!("{{{}}} ({{{}}}): {}", crate_name, found_version_semver, x)
+                }),
+            url: info.crate_data.repository,
+            version: found_version_semver,
+            date: found_version.updated_at,
+        },
+        EntryOrigin::Generated,
     })
 }
 
@@ -152,7 +205,8 @@ mod tests {
     url = {https://github.com/serde-rs/serde},
     date = {2024-12-27},
 }";
-        assert_eq!(format!("{}", bib_entry), expected);
+        assert_eq!(format!("{}", bib_entry.0), expected);
+        assert_eq!(bib_entry.1, EntryOrigin::Generated);
         Ok(())
     }
 }
