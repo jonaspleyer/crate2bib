@@ -62,7 +62,13 @@ pub async fn get_bibtex(
     version: &str,
 ) -> Result<BibTex, Box<dyn std::error::Error>> {
     use crates_io_api::AsyncClient;
-    let client = AsyncClient::new("my-user-agent", web_time::Duration::from_millis(1000))?;
+    use reqwest::header::*;
+    let headers = HeaderMap::new();
+    let client = reqwest::Client::builder()
+        .default_headers(headers)
+        .build()
+        .unwrap();
+    let client = AsyncClient::with_http_client(client, web_time::Duration::from_millis(1000));
     let info = client.get_crate(crate_name).await?;
     let mut obtained_versions = info
         .versions
