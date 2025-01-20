@@ -124,7 +124,6 @@ async fn search_citation_cff(
 /// Describes how the BibLaTeX entry was obtainedj
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "pyo3", pyclass)]
-#[non_exhaustive]
 pub enum EntryOrigin {
     /// Generated from data found on [crates.io](https://crates.io)
     Generated = 0,
