@@ -3,6 +3,10 @@ name = "crate2bib"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "crate2bib"
+crate-type = ["cdylib", "lib"]
+
 [dependencies]
 crates_io_api = { git = "https://github.com/jonaspleyer/crates-io-api", ref = "c021a59f3443fb5b9b1625104d048e0cfa2e65b7" }
 semver = { version = "1.0.24", features = [ "serde" ] }
@@ -11,9 +15,12 @@ serde = { version = "1.0", features = ["derive"] }
 chrono = { version = "0.4", default-features = false }
 web-time = { version = "1.1" }
 reqwest = "0.12.12"
+pyo3 = { version = "0.23", optional = true }
+pyo3-async-runtimes = { version = "0.23", features = ["tokio-runtime"], optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.43.0", features = ["macros"] }
 
 [features]
-default = []
+default = [ ]
+pyo3 = ["dep:pyo3", "dep:pyo3-async-runtimes"]

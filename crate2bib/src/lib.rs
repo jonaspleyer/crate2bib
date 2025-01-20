@@ -9,11 +9,15 @@
 #![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+#[cfg(feature = "pyo3")]
+use pyo3::prelude::*;
+
 use chrono::Datelike;
 use serde::{de::Error, Deserialize, Serialize};
 
 /// A fully specified BibLaTeX entry generated from a crate hostedn on [crates.io](https://crates.io)
 #[derive(Clone, Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "pyo3", pyclass)]
 pub struct BibLaTeX {
     /// BibLaTeX citation key which can be used in LaTeX `\cite{key}`.
     pub key: String,
@@ -191,7 +195,46 @@ pub async fn get_biblatex(
             date: found_version.updated_at,
         },
         EntryOrigin::Generated,
+    ))
+}
+
+/// Wraps the [crate2bib::get_biblatex] function.
+///
+/// Args:
+///     crate_name(str): Name of the crate to get BibLaTeX entry
+///     version (str): A semver-compliant version number for the crate
+///     user_agent (:obj:`str`, optional):: The name of the user agent. Defaults to None.
+/// Returns:
+///     tuple: The formatted BibLaTeX entry and its origin given by [crate2bib::EntryOrigin]
+#[cfg(feature = "pyo3")]
+#[pyfunction]
+#[pyo3(
+    name = "get_biblatex",
+    signature = (crate_name, semver, user_agent = None),
+)]
+fn get_biblatex_py(
+    py: Python,
+    crate_name: String,
+    semver: String,
+    user_agent: Option<String>,
+) -> PyResult<Bound<PyAny>> {
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
+        let (bibtex, origin) = get_biblatex(&crate_name, &semver, user_agent.as_deref())
+            .await
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("{e}")))?;
+        Ok((format!("{}", bibtex), origin as isize))
     })
+}
+
+/// Wrapper of the [crate2bib] crate
+#[cfg(feature = "pyo3")]
+#[cfg_attr(docsrs, doc(cfg(feature = "pyo3")))]
+#[pymodule]
+fn crate2bib(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(get_biblatex_py, m)?)?;
+    m.add_class::<BibLaTeX>()?;
+    m.add_class::<EntryOrigin>()?;
+    Ok(())
 }
 
 #[cfg(test)]
