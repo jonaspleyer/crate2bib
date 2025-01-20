@@ -1,3 +1,12 @@
+//! Search and create BibLaTeX entries for crates hosted on [crates.io](https://crates.io).
+//!
+//! This crate is centered around the [get_biblatex] function.
+//! It works in multiple steps.
+//! 1. Query [crates.io](https://crates.io) and obtain information about crate
+//! 2. Search repository for possible `CITATION` files
+//! 3. Generate BibLaTeX entry from known properties and return the Origin of this information via
+//!    [EntryOrigin]
+
 use chrono::Datelike;
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
