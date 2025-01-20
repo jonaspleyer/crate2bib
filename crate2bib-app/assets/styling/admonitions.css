@@ -1,0 +1,23 @@
+.admonition {
+    padding: 1em;
+    margin: 0.3em;
+    color: var(--color-text);
+    background-color: var(--color-bg-footer);
+}
+
+.admonition-warning {
+    border: 3px solid var(--color-warning);
+    box-shadow: 0 0 5px var(--color-warning);
+}
+.admonition-error {
+    border: 3px solid var(--color-error);
+    box-shadow: 0 0 5px var(--color-error);
+}
+.admonition-success {
+    border: 3px solid var(--color-success);
+    box-shadow: 0 0 5px var(--color-success);
+}
+.admonition-note {
+    border: 3px solid var(--color-note);
+    box-shadow: 0 0 5px var(--color-note);
+}

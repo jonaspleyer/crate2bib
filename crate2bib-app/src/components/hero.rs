@@ -1,12 +1,53 @@
 use dioxus::prelude::*;
 
-const HEADER_SVG: Asset = asset!("/assets/header.svg");
+#[derive(PartialEq, Props, Clone)]
+pub struct Props {
+    message: String,
+}
+
+#[component]
+pub fn Warning(props: Props) -> Element {
+    rsx! {
+        div { class: "admonition admonition-warning", "{props.message}" }
+    }
+}
+
+#[component]
+pub fn Error(props: Props) -> Element {
+    rsx! {
+        div { class: "admonition admonition-error", "{props.message}" }
+    }
+}
+
+#[component]
+pub fn Success(props: Props) -> Element {
+    rsx! {
+        div { class: "admonition admonition-success", "{props.message}" }
+    }
+}
+
+#[component]
+pub fn Note(props: Props) -> Element {
+    rsx! {
+        div { class: "admonition admonition-note", "{props.message}" }
+    }
+}
 
 #[component]
 pub fn Hero() -> Element {
     let mut crate_name = use_signal(|| "cellular-raza".to_string());
     let mut version = use_signal(|| "0.1".to_string());
     let mut bibtex = use_signal(|| "__empty__".to_string());
+
+    let mut messages = use_signal(|| {
+        vec![
+        Warning(
+            Props {
+                message: "Due to CORS Restrictions, this site is currently not supported in the Firefox browser.".to_owned()
+            }
+        ),
+    ]
+    });
 
     let mut update_form = move |event: Event<FormData>| async move {
         let default = vec!["__nothing__".to_string()];
@@ -56,6 +97,11 @@ pub fn Hero() -> Element {
                 code { "CITATION.cff" }
                 " files inside the respective repository of the candidate."
             }
+
+            for i in 0..messages.len() {
+                div { style: "margin: 0.5em;",
+                    {&messages.get(messages.len() - i - 1).unwrap().clone()}
+                }
             }
         }
     }
