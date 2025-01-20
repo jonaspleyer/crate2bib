@@ -8,10 +8,10 @@
 //!    [EntryOrigin]
 
 use chrono::Datelike;
+use serde::{de::Error, Deserialize, Serialize};
 
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Clone, Debug)]
-pub struct BibTex {
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct BibLaTeX {
     pub key: String,
     pub author: String,
     pub title: String,
