@@ -247,7 +247,7 @@ mod tests {
         let expected = "\
 @software {serde2024
     author = {David Tolnay},
-    title = {serde (1.0.217): A generic serialization/deserialization framework},
+    title = {{serde} ({1.0.217}): A generic serialization/deserialization framework},
     url = {https://github.com/serde-rs/serde},
     date = {2024-12-27},
 }";
