@@ -8,6 +8,10 @@ members = [
     "crate2bib-cli",
 ]
 
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
 [profile.wasm-dev]
 inherits = "dev"
 opt-level = 1
