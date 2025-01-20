@@ -255,4 +255,11 @@ mod tests {
         assert_eq!(bib_entry.1, EntryOrigin::Generated);
         Ok(())
     }
+
+    #[tokio::test]
+    async fn find_citation_cff() -> Result<(), Box<dyn std::error::Error>> {
+        let bib_entry = get_biblatex("cellular-raza", "0.1", Some("crate2bib-testing")).await?;
+        assert_eq!(bib_entry.1, EntryOrigin::CitationCff);
+        Ok(())
+    }
 }
