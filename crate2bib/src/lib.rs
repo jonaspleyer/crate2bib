@@ -250,9 +250,9 @@ async fn search_citation_cff(
             for response in requests {
                 let response = response.await?.text().await?;
                 if !response.to_lowercase().contains("404: not found") {
-                    return Ok(Some(BibLaTeX::from_citation_cff(&CitationCff::parse(
-                        &response,
-                    )?)?));
+                    return Ok(Some(BibLaTeX::from_citation_cff(
+                        &citeworks_cff::from_str(&response)?,
+                    )?));
                 }
             }
         }
