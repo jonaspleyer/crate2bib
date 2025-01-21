@@ -35,8 +35,6 @@ pub fn Note(props: Props) -> Element {
 
 #[component]
 pub fn Hero() -> Element {
-    let mut crate_name = use_signal(|| "cellular-raza".to_string());
-    let mut version = use_signal(|| "0.1".to_string());
     let mut messages = use_signal(|| vec![]);
 
     let mut update_form = move |event: Event<FormData>| async move {
@@ -49,9 +47,7 @@ pub fn Hero() -> Element {
             .collect();
         let cn = &values.get("crate_name").unwrap_or(&default)[0];
         let ve = &values.get("version").unwrap_or(&default)[0];
-        crate_name.set(format!("{cn}"));
-        version.set(format!("{ve}"));
-        match crate2bib::get_biblatex(&crate_name.to_string(), &version.to_string(), None).await {
+        match crate2bib::get_biblatex(cn, ve, None).await {
             // TODO rework this; how can we display multiple results?
             Ok(results) => {
                 for (entry, origin) in results {
@@ -96,8 +92,8 @@ pub fn Hero() -> Element {
             h1 { "crate2Bib" }
             h3 { "Create a BibLaTeX entry from a given crate and version number." }
             form { onsubmit: move |event| update_form(event),
-                input { name: "crate_name", r#type: "text", value: crate_name }
-                input { name: "version", r#type: "text", value: version }
+                input { name: "crate_name", r#type: "text", value: "cellular-raza" }
+                input { name: "version", r#type: "text", value: "0.1" }
                 input { value: "Generate", r#type: "submit" }
             }
             h2 { "BibLaTeX Citation" }
