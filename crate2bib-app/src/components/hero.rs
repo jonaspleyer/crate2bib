@@ -54,15 +54,38 @@ pub fn Hero() -> Element {
         match crate2bib::get_biblatex(&crate_name.to_string(), &version.to_string(), None).await {
             // TODO rework this; how can we display multiple results?
             Ok(results) => {
-                for (v, _) in results {
+                for (entry, origin) in results {
+                    let (name, link) = match origin {
+                        crate2bib::EntryOrigin::CratesIO => (
+                            "crates.io".to_string(),
+                            format!("https://crates.io/crates/{crate_name}"),
+                        ),
+                        crate2bib::EntryOrigin::CitationCff => (
+                            "CITATION.cff".to_string(),
+                            entry.url.clone().unwrap_or_default(),
+                        ),
+                    };
+                    let height = format!("{entry}").lines().count() + 5;
                     messages.push(Success(Props {
-                        message: format!("SUCCESS: {crate_name}"),
+                        message: rsx! {
+                            p {
+                                "Found entry for "
+                                code { {crate_name} }
+                                " from "
+                                a { href: {link}, {name} }
+                            }
+                            textarea {
+                                class: "response",
+                                height: "{height}em",
+                                "{entry}",
+                            }
+                        },
                     }));
                 }
             }
             Err(e) => {
                 messages.push(Error(Props {
-                    message: format!("ERROR: {e}"),
+                    message: rsx! { "ERROR: {e}" },
                 }));
             }
         }
