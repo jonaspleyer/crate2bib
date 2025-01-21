@@ -151,7 +151,7 @@ impl BibLaTeX {
 impl std::fmt::Display for BibLaTeX {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Writes the biblatex entry
-        writeln!(f, "@{} {{{}", self.work_type, self.key)?;
+        writeln!(f, "@{} {{{},", self.work_type, self.key)?;
         writeln!(f, "    author = {{{}}},", self.author)?;
         writeln!(f, "    title = {{{}}},", self.title)?;
         if let Some(u) = &self.url {
@@ -399,7 +399,7 @@ mod tests {
         let results = get_biblatex("serde", "1.0.217", Some("crate2bib-testing")).await?;
         let (bib_entry, origin) = &results[0];
         let expected = "\
-@software {Tolnay2024
+@software {Tolnay2024,
     author = {David Tolnay},
     title = {{serde} ({1.0.217}): A generic serialization/deserialization framework},
     url = {https://github.com/serde-rs/serde},
@@ -413,7 +413,7 @@ mod tests {
     #[tokio::test]
     async fn find_citation_cff() -> Result<(), Box<dyn std::error::Error>> {
         let results = get_biblatex("cellular-raza", "0.1", Some("crate2bib-testing")).await?;
-        let (bib_entry, origin) = &results[0];
+        let (_, origin) = &results[0];
         assert_eq!(origin, &EntryOrigin::CitationCff);
         let (bib_entry, origin) = &results[1];
         println!("{bib_entry}");

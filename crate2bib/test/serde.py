@@ -8,7 +8,7 @@ async def obtain_result():
     )
     biblatex, origin = results[0]
     expected = "\
-@software {Tolnay2024\n\
+@software {Tolnay2024,\n\
     author = {David Tolnay},\n\
     title = {{serde} ({1.0.217}): A generic serialization/deserialization framework},\n\
     url = {https://github.com/serde-rs/serde},\n\
