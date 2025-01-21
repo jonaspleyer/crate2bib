@@ -281,7 +281,8 @@ pub async fn get_biblatex(
     crate_name: &str,
     version: &str,
     user_agent: Option<&str>,
-) -> Result<(BibLaTeX, EntryOrigin), Box<dyn std::error::Error>> {
+) -> Result<Vec<(BibLaTeX, EntryOrigin)>, Box<dyn std::error::Error>> {
+    let mut results = vec![];
     use crates_io_api::AsyncClient;
     use reqwest::header::*;
     let mut headers = HeaderMap::new();
@@ -313,11 +314,10 @@ pub async fn get_biblatex(
     let found_version = info.versions[index].clone();
 
     if let Some(bibtex) = search_citation_cff(&client1, &info.crate_data.repository).await? {
-        println!("Returning new citation");
-        return Ok((bibtex, EntryOrigin::CitationCff));
+        results.push((bibtex, EntryOrigin::CitationCff));
     }
 
-    Ok((
+    results.push((
         BibLaTeX {
             key: format!("{}{}", crate_name, info.crate_data.updated_at.year()),
             work_type: "software".to_string(),
@@ -335,7 +335,8 @@ pub async fn get_biblatex(
             date: Some(found_version.updated_at),
         },
         EntryOrigin::CratesIO,
-    ))
+    ));
+    Ok(results)
 }
 
 /// Wraps the [crate2bib::get_biblatex] function.
@@ -359,10 +360,12 @@ fn get_biblatex_py(
     user_agent: Option<String>,
 ) -> PyResult<Bound<PyAny>> {
     pyo3_async_runtimes::tokio::future_into_py(py, async move {
-        let (bibtex, origin) = get_biblatex(&crate_name, &semver, user_agent.as_deref())
+        Ok(get_biblatex(&crate_name, &semver, user_agent.as_deref())
             .await
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("{e}")))?;
-        Ok((format!("{}", bibtex), origin as isize))
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("{e}")))?
+            .into_iter()
+            .map(|(bib_entry, origin)| (format!("{bib_entry}"), origin as isize))
+            .collect::<Vec<_>>())
     })
 }
 
@@ -383,7 +386,8 @@ mod tests {
 
     #[tokio::test]
     async fn access_crates_io() -> Result<(), Box<dyn std::error::Error>> {
-        let bib_entry = get_biblatex("serde", "1.0.217", Some("crate2bib-testing")).await?;
+        let results = get_biblatex("serde", "1.0.217", Some("crate2bib-testing")).await?;
+        let (bib_entry, origin) = &results[0];
         let expected = "\
 @software {serde2024
     author = {David Tolnay},
@@ -391,15 +395,17 @@ mod tests {
     url = {https://github.com/serde-rs/serde},
     date = {2024-12-27},
 }";
-        assert_eq!(format!("{}", bib_entry.0), expected);
-        assert_eq!(bib_entry.1, &EntryOrigin::CratesIO);
+        assert_eq!(format!("{}", bib_entry), expected);
+        assert_eq!(origin, &EntryOrigin::CratesIO);
         Ok(())
     }
 
     #[tokio::test]
     async fn find_citation_cff() -> Result<(), Box<dyn std::error::Error>> {
-        let (bib_entry, origin) =
-            get_biblatex("cellular-raza", "0.1", Some("crate2bib-testing")).await?;
+        let results = get_biblatex("cellular-raza", "0.1", Some("crate2bib-testing")).await?;
+        let (bib_entry, origin) = &results[0];
+        assert_eq!(origin, &EntryOrigin::CitationCff);
+        let (bib_entry, origin) = &results[1];
         println!("{bib_entry}");
         assert_eq!(origin, &EntryOrigin::CratesIO);
         Ok(())

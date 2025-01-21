@@ -17,14 +17,16 @@ struct Args {
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let (biblatex, origin) =
+    let results =
         crate2bib::get_biblatex(&args.crate_name, &args.semver, Some(&args.user_agent)).await?;
-    match origin {
-        crate2bib::EntryOrigin::CitationCff => {
-            println!("Obtained from CITATION file in repository")
+    for (biblatex, origin) in results {
+        match origin {
+            crate2bib::EntryOrigin::CitationCff => {
+                println!("Obtained from CITATION file in repository")
+            }
+            crate2bib::EntryOrigin::CratesIO => println!("Obtained from crates.io information"),
         }
-        crate2bib::EntryOrigin::Generated => println!("Obtained from crates.io information"),
+        println!("{biblatex}");
     }
-    println!("{biblatex}");
     Ok(())
 }

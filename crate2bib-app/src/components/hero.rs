@@ -53,14 +53,15 @@ pub fn Hero() -> Element {
         let ve = &values.get("version").unwrap_or(&default)[0];
         crate_name.set(format!("{cn}"));
         version.set(format!("{ve}"));
-        let bib =
-            crate2bib::get_biblatex(&crate_name.to_string(), &version.to_string(), None).await;
-        match bib {
-            Ok((v, _)) => {
-                biblatex.set(format!("{v}"));
-                messages.push(Success(Props {
-                    message: format!("SUCCESS: {crate_name}"),
-                }));
+        match crate2bib::get_biblatex(&crate_name.to_string(), &version.to_string(), None).await {
+            // TODO rework this; how can we display multiple results?
+            Ok(results) => {
+                for (v, _) in results {
+                    biblatex.set(format!("{v}"));
+                    messages.push(Success(Props {
+                        message: format!("SUCCESS: {crate_name}"),
+                    }));
+                }
             }
             Err(e) => {
                 messages.push(Error(Props {
