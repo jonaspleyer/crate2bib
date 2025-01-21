@@ -37,10 +37,114 @@ pub struct BibLaTeX {
 
 impl BibLaTeX {
     /// Converts a [CitationCff] file to [BibLaTeX]
-    pub fn from_citation_cff(
-        citation_cff: &CitationCff,
-    ) -> Result<Self, Box<dyn std::error::Error>> {
-        todo!()
+    pub fn from_citation_cff(cff: &citeworks_cff::Cff) -> Result<Self, Box<dyn std::error::Error>> {
+        #[allow(unused)]
+        let citeworks_cff::Cff {
+            cff_version,
+            message,
+            title,
+            work_type,
+            version,
+            commit,
+            date_released,
+            abstract_text,
+            keywords,
+            url,
+            repository,
+            repository_artifact,
+            repository_code,
+            license,
+            license_url,
+            authors,
+            contact,
+            doi,
+            identifiers,
+            preferred_citation,
+            references,
+        } = cff.clone();
+        let version = version.and_then(|v| semver::Version::parse(&v).ok());
+        let date = date_released.and_then(
+            |citeworks_cff::Date { year, month, day }| -> Option<chrono::DateTime<chrono::Utc>> {
+                Some(
+                    chrono::NaiveDate::from_ymd_opt(year as i32, month as u32, day as u32)?
+                        .and_hms_opt(0, 0, 0)?
+                        .and_utc(),
+                )
+            },
+        );
+        let key = format!(
+            "{}{}",
+            authors
+                .first()
+                .and_then(|a| match a {
+                    citeworks_cff::names::Name::Person(person_name) =>
+                        person_name.family_names.clone(),
+                    citeworks_cff::names::Name::Entity(entity_name) => entity_name.name.clone(),
+                    citeworks_cff::names::Name::Anonymous => None,
+                })
+                .unwrap_or(title.clone()),
+            date_released
+                .map(|d| format!("{:4}", d.year))
+                .unwrap_or("".to_owned())
+        );
+        let author = authors
+            .into_iter()
+            .map(|author| {
+                use citeworks_cff::names::Name::*;
+                match author {
+                    #[allow(unused)]
+                    Person(citeworks_cff::names::PersonName {
+                        family_names,
+                        given_names,
+                        name_particle,
+                        name_suffix,
+                        affiliation,
+                        meta,
+                    }) => format!(
+                        "{}{}{}{}",
+                        given_names.map(|x| format!("{x} ")).unwrap_or_default(),
+                        name_particle.map(|x| format!("{x} ")).unwrap_or_default(),
+                        family_names.map(|x| format!("{x} ")).unwrap_or_default(),
+                        name_suffix.unwrap_or_default(),
+                    )
+                    .trim_end()
+                    .to_string(),
+                    #[allow(unused)]
+                    Entity(citeworks_cff::names::EntityName {
+                        name,
+                        date_start,
+                        date_end,
+                        meta,
+                    }) => name.unwrap_or_default(),
+                    Anonymous => "Anonymous".to_string(),
+                }
+            })
+            .reduce(|acc, x| format!("{acc}, {x}"))
+            .unwrap_or_default();
+        Ok(Self {
+            key,
+            work_type: match work_type {
+                Some(citeworks_cff::WorkType::Software) => "software",
+                Some(citeworks_cff::WorkType::Dataset) => "dataset",
+                None => "software",
+            }
+            .to_string(),
+            author, // authors.into_iter().map(|a| format!("{a}")),
+            title: format!(
+                "{title}{}{}",
+                version
+                    .as_ref()
+                    .map(|v| format!(" ({v})"))
+                    .unwrap_or("".to_owned()),
+                abstract_text.unwrap_or_default()
+            ),
+            url: repository
+                .map(|url| format!("{url}"))
+                .or(repository_code.map(|url| format!("{url}")))
+                .or(repository_artifact.map(|url| format!("{url}"))),
+            version,
+            date,
+        })
     }
 }
 
