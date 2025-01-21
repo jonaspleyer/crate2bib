@@ -21,6 +21,8 @@ use serde::{de::Error, Deserialize, Serialize};
 pub struct BibLaTeX {
     /// BibLaTeX citation key which can be used in LaTeX `\cite{key}`.
     pub key: String,
+    /// One of BibLaTeX's types. This is usually `software` in our case
+    pub work_type: String,
     /// All authors of the crate.
     pub author: String,
     /// The title of the crate is a combination of the name, version and description of the crate
@@ -45,7 +47,7 @@ impl BibLaTeX {
 impl std::fmt::Display for BibLaTeX {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Writes the biblatex entry
-        writeln!(f, "@software {{{}", self.key)?;
+        writeln!(f, "@{} {{{}", self.work_type, self.key)?;
         writeln!(f, "    author = {{{}}},", self.author)?;
         writeln!(f, "    title = {{{}}},", self.title)?;
         if let Some(u) = &self.url {
@@ -212,6 +214,7 @@ pub async fn get_biblatex(
     Ok((
         BibLaTeX {
             key: format!("{}{}", crate_name, info.crate_data.updated_at.year()),
+            work_type: "software".to_string(),
             author: found_version
                 .published_by
                 .map_or_else(|| "".to_owned(), |x| x.name.unwrap_or(x.login)),
