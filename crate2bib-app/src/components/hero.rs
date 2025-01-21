@@ -37,8 +37,6 @@ pub fn Note(props: Props) -> Element {
 pub fn Hero() -> Element {
     let mut crate_name = use_signal(|| "cellular-raza".to_string());
     let mut version = use_signal(|| "0.1".to_string());
-    let mut biblatex = use_signal(|| "__empty__".to_string());
-
     let mut messages = use_signal(|| vec![]);
 
     let mut update_form = move |event: Event<FormData>| async move {
@@ -57,7 +55,6 @@ pub fn Hero() -> Element {
             // TODO rework this; how can we display multiple results?
             Ok(results) => {
                 for (v, _) in results {
-                    biblatex.set(format!("{v}"));
                     messages.push(Success(Props {
                         message: format!("SUCCESS: {crate_name}"),
                     }));
@@ -81,7 +78,6 @@ pub fn Hero() -> Element {
                 input { value: "Generate", r#type: "submit" }
             }
             h2 { "BibLaTeX Citation" }
-            textarea { id: "response", value: biblatex }
             p {
                 "The "
                 a { href: "https://github.com/jonaspleyer/crate2bib", "crate2bib" }
