@@ -2,6 +2,9 @@
 name = "crate2bib"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Create BibLaTeX entries for crates hosted on crates.io"
+repository = "https://github.com/jonaspleyer/crate2bib"
 
 [lib]
 name = "crate2bib"

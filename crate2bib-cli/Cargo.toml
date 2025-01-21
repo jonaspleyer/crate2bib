@@ -2,6 +2,9 @@
 name = "crate2bib-cli"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "A CLI tool for the crate2bib crate"
+repository = "https://github.com/jonaspleyer/crate2bib"
 
 [dependencies]
 async-std = { version = "1.13", features = ["attributes", "tokio1"] }
