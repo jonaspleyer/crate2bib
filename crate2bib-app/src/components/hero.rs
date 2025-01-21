@@ -2,34 +2,34 @@ use dioxus::prelude::*;
 
 #[derive(PartialEq, Props, Clone)]
 pub struct Props {
-    message: String,
+    message: Element,
 }
 
 #[component]
 pub fn Warning(props: Props) -> Element {
     rsx! {
-        div { class: "admonition admonition-warning", "{props.message}" }
+        div { class: "admonition admonition-warning", {props.message} }
     }
 }
 
 #[component]
 pub fn Error(props: Props) -> Element {
     rsx! {
-        div { class: "admonition admonition-error", "{props.message}" }
+        div { class: "admonition admonition-error", {props.message} }
     }
 }
 
 #[component]
 pub fn Success(props: Props) -> Element {
     rsx! {
-        div { class: "admonition admonition-success", "{props.message}" }
+        div { class: "admonition admonition-success", {props.message} }
     }
 }
 
 #[component]
 pub fn Note(props: Props) -> Element {
     rsx! {
-        div { class: "admonition admonition-note", "{props.message}" }
+        div { class: "admonition admonition-note", {props.message} }
     }
 }
 
