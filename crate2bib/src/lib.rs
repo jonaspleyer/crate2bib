@@ -30,9 +30,9 @@ pub struct BibLaTeX {
     /// Contains the repository where the crate is hosted
     pub url: Option<String>,
     /// Version which was automatically found by [semver]
-    pub version: semver::Version,
+    pub version: Option<semver::Version>,
     /// The time at which this version was published
-    pub date: chrono::DateTime<chrono::Utc>,
+    pub date: Option<chrono::DateTime<chrono::Utc>>,
 }
 
 impl BibLaTeX {
@@ -53,13 +53,15 @@ impl std::fmt::Display for BibLaTeX {
         if let Some(u) = &self.url {
             writeln!(f, "    url = {{{u}}},")?;
         };
-        writeln!(
-            f,
-            "    date = {{{:4.0}-{:02}-{:02}}},",
-            self.date.year(),
-            self.date.month(),
-            self.date.day(),
-        )?;
+        if let Some(date) = self.date {
+            writeln!(
+                f,
+                "    date = {{{:4.0}-{:02}-{:02}}},",
+                date.year(),
+                date.month(),
+                date.day(),
+            )?;
+        }
         // Closes the entry
         write!(f, "}}")?;
         Ok(())
@@ -225,8 +227,8 @@ pub async fn get_biblatex(
                     format!("{{{}}} ({{{}}}): {}", crate_name, found_version_semver, x)
                 }),
             url: info.crate_data.repository,
-            version: found_version_semver,
-            date: found_version.updated_at,
+            version: Some(found_version_semver),
+            date: Some(found_version.updated_at),
         },
         EntryOrigin::Generated,
     ))
