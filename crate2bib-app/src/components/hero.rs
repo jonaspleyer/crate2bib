@@ -73,13 +73,9 @@ pub fn Hero() -> Element {
                                 "Found entry for "
                                 code { "{crate_name} ({version_found})" }
                                 " from "
-                                a { href: {link}, {name} }
+                                a { href: link, {name} }
                             }
-                            textarea {
-                                class: "response",
-                                height: "{height}em",
-                                "{entry}",
-                            }
+                            textarea { class: "response", height: "{height}em", "{entry}" }
                         },
                     }));
                 }
@@ -97,7 +93,11 @@ pub fn Hero() -> Element {
             h1 { "crate2Bib" }
             h3 { "Create a BibLaTeX entry from a given crate and version number." }
             form { onsubmit: move |event| update_form(event),
-                input { name: "crate_name", r#type: "text", value: "cellular-raza" }
+                input {
+                    name: "crate_name",
+                    r#type: "text",
+                    value: "cellular-raza",
+                }
                 input { name: "version", r#type: "text", value: "0.1" }
                 input { value: "Generate", r#type: "submit" }
             }
