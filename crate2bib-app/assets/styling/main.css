@@ -100,11 +100,10 @@ footer {
     background-color: var(--color-bg-footer);
 }
 
-#hero #response, #notes {
+.response {
     color: var(--color-text-code);
     width: 80%;
-    height: 15em;
-    margin-top: 1em;
+    /* height: 15em;*/
     padding: 1em;
     border: 1px white;
     background: var(--color-bg-code);
