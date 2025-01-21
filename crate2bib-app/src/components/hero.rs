@@ -45,9 +45,9 @@ pub fn Hero() -> Element {
             .iter()
             .map(|(k, v)| (k.clone(), v.0.clone()))
             .collect();
-        let cn = &values.get("crate_name").unwrap_or(&default)[0];
-        let ve = &values.get("version").unwrap_or(&default)[0];
-        match crate2bib::get_biblatex(cn, ve, None).await {
+        let crate_name = &values.get("crate_name").unwrap_or(&default)[0];
+        let version = &values.get("version").unwrap_or(&default)[0];
+        match crate2bib::get_biblatex(crate_name, version, None).await {
             // TODO rework this; how can we display multiple results?
             Ok(results) => {
                 for (entry, origin) in results {
@@ -62,11 +62,16 @@ pub fn Hero() -> Element {
                         ),
                     };
                     let height = format!("{entry}").lines().count() + 5;
+                    let version_found = entry
+                        .version
+                        .as_ref()
+                        .map(|x| format!("{x}"))
+                        .unwrap_or("".to_string());
                     messages.push(Success(Props {
                         message: rsx! {
                             p {
                                 "Found entry for "
-                                code { {crate_name} }
+                                code { "{crate_name} ({version_found})" }
                                 " from "
                                 a { href: {link}, {name} }
                             }
