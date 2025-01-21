@@ -9,7 +9,7 @@ crate-type = ["cdylib", "lib"]
 
 [dependencies]
 crates_io_api = { git = "https://github.com/jonaspleyer/crates-io-api", ref = "c021a59f3443fb5b9b1625104d048e0cfa2e65b7" }
-semver = { version = "1.0", features = [ "serde" ] }
+semver.workspace = true
 serde_json.workspace = true
 serde.workspace = true
 chrono = { version = "0.4", default-features = false }
