@@ -2,7 +2,6 @@
 resolver = "2"
 
 members = [
-    "citation-cff",
     "crate2bib",
     "crate2bib-app",
     "crate2bib-cli",

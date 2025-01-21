@@ -9,7 +9,6 @@
 #![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-use citation_cff::CitationCff;
 #[cfg(feature = "pyo3")]
 use pyo3::prelude::*;
 
