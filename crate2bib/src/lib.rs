@@ -319,7 +319,17 @@ pub async fn get_biblatex(
 
     results.push((
         BibLaTeX {
-            key: format!("{}{}", crate_name, info.crate_data.updated_at.year()),
+            key: format!(
+                "{}{}",
+                found_version
+                    .published_by
+                    .clone()
+                    .and_then(|x| x
+                        .name
+                        .and_then(|x| x.split(" ").nth(1).map(|x| x.to_string())))
+                    .unwrap_or(crate_name.to_string()),
+                info.crate_data.updated_at.year()
+            ),
             work_type: "software".to_string(),
             author: found_version
                 .published_by
@@ -389,7 +399,7 @@ mod tests {
         let results = get_biblatex("serde", "1.0.217", Some("crate2bib-testing")).await?;
         let (bib_entry, origin) = &results[0];
         let expected = "\
-@software {serde2024
+@software {Tolnay2024
     author = {David Tolnay},
     title = {{serde} ({1.0.217}): A generic serialization/deserialization framework},
     url = {https://github.com/serde-rs/serde},
