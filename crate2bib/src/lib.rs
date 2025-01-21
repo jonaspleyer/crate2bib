@@ -265,7 +265,7 @@ async fn search_citation_cff(
 #[cfg_attr(feature = "pyo3", pyclass)]
 pub enum EntryOrigin {
     /// Generated from data found on [crates.io](https://crates.io)
-    Generated = 0,
+    CratesIO = 0,
     /// Found citation file in repository
     CitationCff = 1,
     // Contains a BibLaTeX entry inside of the README file
@@ -334,7 +334,7 @@ pub async fn get_biblatex(
             version: Some(found_version_semver),
             date: Some(found_version.updated_at),
         },
-        EntryOrigin::Generated,
+        EntryOrigin::CratesIO,
     ))
 }
 
@@ -392,7 +392,7 @@ mod tests {
     date = {2024-12-27},
 }";
         assert_eq!(format!("{}", bib_entry.0), expected);
-        assert_eq!(bib_entry.1, EntryOrigin::Generated);
+        assert_eq!(bib_entry.1, &EntryOrigin::CratesIO);
         Ok(())
     }
 
@@ -401,8 +401,7 @@ mod tests {
         let (bib_entry, origin) =
             get_biblatex("cellular-raza", "0.1", Some("crate2bib-testing")).await?;
         println!("{bib_entry}");
-        assert_eq!(origin, EntryOrigin::CitationCff);
-        panic!();
+        assert_eq!(origin, &EntryOrigin::CratesIO);
         Ok(())
     }
 }
