@@ -407,7 +407,7 @@ mod tests {
 
     #[tokio::test]
     async fn access_crates_io() -> Result<(), Box<dyn std::error::Error>> {
-        let results = get_biblatex("serde", "1.0.217", Some("crate2bib-testing")).await?;
+        let results = get_biblatex("serde", Some("1.0.217"), Some("crate2bib-testing")).await?;
         let (bib_entry, origin) = &results[0];
         let expected = "\
 @software {Tolnay2024,
@@ -423,12 +423,19 @@ mod tests {
 
     #[tokio::test]
     async fn find_citation_cff() -> Result<(), Box<dyn std::error::Error>> {
-        let results = get_biblatex("cellular-raza", "0.1", Some("crate2bib-testing")).await?;
+        let results = get_biblatex("cellular-raza", Some("0.1"), Some("crate2bib-testing")).await?;
         let (_, origin) = &results[0];
         assert_eq!(origin, &EntryOrigin::CitationCff);
         let (bib_entry, origin) = &results[1];
         println!("{bib_entry}");
         assert_eq!(origin, &EntryOrigin::CratesIO);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn find_crate_without_version() -> Result<(), Box<dyn std::error::Error>> {
+        let results = get_biblatex("cellular-raza", None, Some("crate2bib-testing")).await?;
+        assert!(!results.is_empty());
         Ok(())
     }
 }
