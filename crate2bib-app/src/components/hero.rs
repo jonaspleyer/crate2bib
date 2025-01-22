@@ -35,7 +35,7 @@ pub fn Note(props: Props) -> Element {
 
 #[component]
 pub fn Hero() -> Element {
-    let mut messages = use_signal(|| vec![]);
+    let mut messages = use_signal(|| circ_buffer::RingBuffer::<_, 8>::new());
 
     let mut update_form = move |event: Event<FormData>| async move {
         let default = vec!["__nothing__".to_string()];
@@ -67,7 +67,7 @@ pub fn Hero() -> Element {
                         .as_ref()
                         .map(|x| format!("{x}"))
                         .unwrap_or("".to_string());
-                    messages.push(Success(Props {
+                    messages.write().push(Success(Props {
                         message: rsx! {
                             p {
                                 "Found entry for "
@@ -81,7 +81,7 @@ pub fn Hero() -> Element {
                 }
             }
             Err(e) => {
-                messages.push(Error(Props {
+                messages.write().push(Error(Props {
                     message: rsx! { "ERROR: {e}" },
                 }));
             }
@@ -112,9 +112,9 @@ pub fn Hero() -> Element {
                 " files inside the respective repository of the candidate."
             }
 
-            for i in 0..messages.len() {
+            for i in 0..messages.read().len() {
                 div { style: "margin: 0.5em;",
-                    {&messages.get(messages.len() - i - 1).unwrap().clone()}
+                    {&messages.read()[messages.read().len() - i - 1].clone()}
                 }
             }
         }
