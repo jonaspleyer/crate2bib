@@ -1,6 +1,6 @@
 [package]
 name = "crate2bib-app"
-version = "0.1.0"
+version.workspace = true
 authors = ["Jonas Pleyer <jonas.pleyer@fdm.uni-freiburg.de>"]
 edition = "2021"
 
