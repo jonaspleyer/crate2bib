@@ -173,16 +173,16 @@ impl std::fmt::Display for BibLaTeX {
 }
 
 #[derive(Clone, Debug)]
-struct VersionError(String);
+struct NotFoundError(String);
 
-impl std::fmt::Display for VersionError {
+impl std::fmt::Display for NotFoundError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)?;
         Ok(())
     }
 }
 
-impl std::error::Error for VersionError {
+impl std::error::Error for NotFoundError {
     fn cause(&self) -> Option<&dyn std::error::Error> {
         None
     }
@@ -310,7 +310,7 @@ pub async fn get_biblatex(
     let (index, found_version_semver) = obtained_versions
         .into_iter()
         .find(|x| version.matches(&x.1))
-        .ok_or(VersionError(format!("Could not find {}", version)))?;
+        .ok_or(NotFoundError(format!("Could not find {}", version)))?;
     let found_version = info.versions[index].clone();
 
     if let Some(bibtex) = search_citation_cff(&client1, &info.crate_data.repository).await? {
