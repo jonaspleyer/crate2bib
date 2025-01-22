@@ -38,16 +38,29 @@ pub fn Hero() -> Element {
     let mut messages = use_signal(|| circ_buffer::RingBuffer::<_, 8>::new());
 
     let mut update_form = move |event: Event<FormData>| async move {
-        let default = vec!["__nothing__".to_string()];
         let values: std::collections::HashMap<_, _> = event
             .data
             .values()
             .iter()
             .map(|(k, v)| (k.clone(), v.0.clone()))
             .collect();
-        let crate_name = &values.get("crate_name").unwrap_or(&default)[0];
-        let version = &values.get("version").unwrap_or(&default)[0];
-        match crate2bib::get_biblatex(crate_name, version, None).await {
+        let crate_name = &values.get("crate_name").unwrap()[0];
+        let version: Option<&String> = values.get("version").and_then(|x| x.first());
+        let mut y = String::new();
+        match crate2bib::get_biblatex(
+            crate_name,
+            version.and_then(|x| {
+                y = x.replace(" ", "");
+                if y.is_empty() {
+                    None
+                } else {
+                    Some(y.as_str())
+                }
+            }),
+            None,
+        )
+        .await
+        {
             // TODO rework this; how can we display multiple results?
             Ok(results) => {
                 for (entry, origin) in results {
