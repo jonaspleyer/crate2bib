@@ -279,7 +279,7 @@ pub enum EntryOrigin {
 /// but this may yield errors when calling from a static website due to CORS.
 pub async fn get_biblatex(
     crate_name: &str,
-    version: &str,
+    version: Option<&str>,
     user_agent: Option<&str>,
 ) -> Result<Vec<(BibLaTeX, EntryOrigin)>, Box<dyn std::error::Error>> {
     let mut results = vec![];
@@ -306,11 +306,20 @@ pub async fn get_biblatex(
         .collect::<Vec<_>>();
     obtained_versions.sort_by_key(|x| x.1.clone());
     obtained_versions.reverse();
-    let version = semver::Comparator::parse(version)?;
-    let (index, found_version_semver) = obtained_versions
-        .into_iter()
-        .find(|x| version.matches(&x.1))
-        .ok_or(NotFoundError(format!("Could not find {}", version)))?;
+
+    let (index, found_version_semver) = if let Some(version) = version {
+        let version = semver::Comparator::parse(version)?;
+        obtained_versions
+            .into_iter()
+            .find(|x| version.matches(&x.1))
+    } else {
+        obtained_versions.first().cloned()
+    }
+    .ok_or(NotFoundError(
+        version.map_or(format!("Could not find crate {crate_name}"), |x| {
+            format!("Could not find version {x} for crate {crate_name}")
+        }),
+    ))?;
     let found_version = info.versions[index].clone();
 
     if let Some(bibtex) = search_citation_cff(&client1, &info.crate_data.repository).await? {
@@ -361,21 +370,23 @@ pub async fn get_biblatex(
 #[pyfunction]
 #[pyo3(
     name = "get_biblatex",
-    signature = (crate_name, semver, user_agent = None),
+    signature = (crate_name, semver = None, user_agent = None),
 )]
 fn get_biblatex_py(
     py: Python,
     crate_name: String,
-    semver: String,
+    semver: Option<String>,
     user_agent: Option<String>,
 ) -> PyResult<Bound<PyAny>> {
     pyo3_async_runtimes::tokio::future_into_py(py, async move {
-        Ok(get_biblatex(&crate_name, &semver, user_agent.as_deref())
-            .await
-            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("{e}")))?
-            .into_iter()
-            .map(|(bib_entry, origin)| (format!("{bib_entry}"), origin as isize))
-            .collect::<Vec<_>>())
+        Ok(
+            get_biblatex(&crate_name, semver.as_deref(), user_agent.as_deref())
+                .await
+                .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("{e}")))?
+                .into_iter()
+                .map(|(bib_entry, origin)| (format!("{bib_entry}"), origin as isize))
+                .collect::<Vec<_>>(),
+        )
     })
 }
 
