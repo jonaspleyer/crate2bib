@@ -9,7 +9,7 @@ use clap::Parser;
 )]
 struct Args {
     crate_name: String,
-    semver: String,
+    semver: Option<String>,
     #[arg(short, long, default_value_t = format!("crate2bib-cli-user-agent"))]
     user_agent: String,
 }
@@ -17,8 +17,12 @@ struct Args {
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let results =
-        crate2bib::get_biblatex(&args.crate_name, &args.semver, Some(&args.user_agent)).await?;
+    let results = crate2bib::get_biblatex(
+        &args.crate_name,
+        args.semver.as_deref(),
+        Some(&args.user_agent),
+    )
+    .await?;
     for (biblatex, origin) in results {
         match origin {
             crate2bib::EntryOrigin::CitationCff => {
