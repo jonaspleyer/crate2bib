@@ -188,6 +188,9 @@ impl std::fmt::Display for BibLaTeX {
                 date.day(),
             )?;
         }
+        if let Some(license) = &self.license {
+            writeln!(f, "    license = {{{license}}},")?;
+        }
         // Closes the entry
         write!(f, "}}")?;
         Ok(())
@@ -438,6 +441,7 @@ mod tests {
     title = {{serde} ({1.0.217}): A generic serialization/deserialization framework},
     url = {https://github.com/serde-rs/serde},
     date = {2024-12-27},
+    license = {MIT OR Apache-2.0},
 }";
         assert_eq!(format!("{}", bib_entry), expected);
         assert_eq!(origin, &EntryOrigin::CratesIO);
