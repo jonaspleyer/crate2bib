@@ -29,6 +29,8 @@ pub struct BibLaTeX {
     pub title: String,
     /// Contains the repository where the crate is hosted
     pub url: Option<String>,
+    /// The license under which the software is distributed
+    pub license: Option<String>,
     /// Version which was automatically found by [semver]
     pub version: Option<semver::Version>,
     /// The time at which this version was published
@@ -142,6 +144,26 @@ impl BibLaTeX {
                 .map(|url| format!("{url}"))
                 .or(repository_code.map(|url| format!("{url}")))
                 .or(repository_artifact.map(|url| format!("{url}"))),
+            license: match license {
+                Some(citeworks_cff::License::Single(l)) => Some(format!("{l}")),
+                Some(citeworks_cff::License::AnyOf(ll)) => {
+                    if ll.is_empty() {
+                        None
+                    } else {
+                        let mut out = String::new();
+                        let n = ll.len();
+                        for (i, l) in ll.iter().enumerate() {
+                            if i < n - 1 {
+                                out = format!("{out}, {l}");
+                            } else {
+                                out = format!("{out} OR {l}")
+                            }
+                        }
+                        Some(out)
+                    }
+                }
+                None => None,
+            },
             version,
             date,
         })
@@ -350,6 +372,7 @@ pub async fn get_biblatex(
                     format!("{{{}}} ({{{}}}): {}", crate_name, found_version_semver, x)
                 }),
             url: info.crate_data.repository,
+            license: found_version.license,
             version: Some(found_version_semver),
             date: Some(found_version.updated_at),
         },
