@@ -184,6 +184,9 @@ impl std::fmt::Display for BibLaTeX {
                 date.day(),
             )?;
         }
+        if let Some(version) = &self.version {
+            writeln!(f, "    version = {{{version}}},")?;
+        }
         if let Some(license) = &self.license {
             writeln!(f, "    license = {{{license}}},")?;
         }
@@ -437,6 +440,7 @@ mod tests {
     title = {{serde}: A generic serialization/deserialization framework},
     url = {https://github.com/serde-rs/serde},
     date = {2024-12-27},
+    version = {1.0.217},
     license = {MIT OR Apache-2.0},
 }";
         assert_eq!(format!("{}", bib_entry), expected);
