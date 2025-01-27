@@ -10,9 +10,11 @@ async def obtain_result():
     expected = "\
 @software {Tolnay2024,\n\
     author = {David Tolnay},\n\
-    title = {{serde} ({1.0.217}): A generic serialization/deserialization framework},\n\
+    title = {{serde}: A generic serialization/deserialization framework},\n\
     url = {https://github.com/serde-rs/serde},\n\
     date = {2024-12-27},\n\
+    version = {1.0.217},\n\
+    license = {MIT OR Apache-2.0},\n\
 }"
     assert biblatex == expected
     assert origin == 0
