@@ -296,6 +296,15 @@ pub enum EntryOrigin {
     // ReadmeCitation = 2,
 }
 
+impl core::fmt::Display for EntryOrigin {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            EntryOrigin::CratesIO => f.write_str("crates.io"),
+            EntryOrigin::CitationCff => f.write_str("CITATION.cff"),
+        }
+    }
+}
+
 /// Returns a [BibLaTeX] entry for the searched crate.
 ///
 /// ## Note
