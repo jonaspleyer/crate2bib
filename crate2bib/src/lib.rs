@@ -133,12 +133,8 @@ impl BibLaTeX {
             .to_string(),
             author, // authors.into_iter().map(|a| format!("{a}")),
             title: format!(
-                "{title}{}{}",
-                version
-                    .as_ref()
-                    .map(|v| format!(" ({v})"))
-                    .unwrap_or("".to_owned()),
-                abstract_text.unwrap_or_default()
+                "{{{title}}}{}",
+                abstract_text.map_or_else(|| "".to_string(), |x| format!(": {x}"))
             ),
             url: repository
                 .map(|url| format!("{url}"))
@@ -371,8 +367,8 @@ pub async fn get_biblatex(
             title: info
                 .crate_data
                 .description
-                .map_or(crate_name.to_owned(), |x| {
-                    format!("{{{}}} ({{{}}}): {}", crate_name, found_version_semver, x)
+                .map_or(format!("{{{}}}", crate_name), |x| {
+                    format!("{{{}}}: {}", crate_name, x)
                 }),
             url: info.crate_data.repository,
             license: found_version.license,
@@ -438,7 +434,7 @@ mod tests {
         let expected = "\
 @software {Tolnay2024,
     author = {David Tolnay},
-    title = {{serde} ({1.0.217}): A generic serialization/deserialization framework},
+    title = {{serde}: A generic serialization/deserialization framework},
     url = {https://github.com/serde-rs/serde},
     date = {2024-12-27},
     license = {MIT OR Apache-2.0},
