@@ -6,6 +6,9 @@
 //! 2. Search repository for possible `CITATION` files
 //! 3. Generate BibLaTeX entry from known properties and return the Origin of this information via
 //!    [EntryOrigin]
+//!
+//! It can be used in a web version under
+//! [jonaspleyer.github.io/crate2bib](https://jonaspleyer.github.io/crate2bib).
 #![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
