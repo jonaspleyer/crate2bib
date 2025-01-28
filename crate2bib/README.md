@@ -1,3 +1,6 @@
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jonaspleyer/crate2bib/webapp.yml?style=flat-square&label=Build)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jonaspleyer/crate2bib/test.yml?style=flat-square&label=Test)
+
 # crate2bib
 
 This crate searches for packages and versions and creates a BibLaTeX entry.
