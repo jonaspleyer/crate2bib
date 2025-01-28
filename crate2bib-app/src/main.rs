@@ -6,6 +6,7 @@ use components::Hero;
 mod components;
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
+const GITHUB_MARK_WHITE: Asset = asset!("/assets/github-mark-white.svg");
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
 const ADMONITION_CSS: Asset = asset!("/assets/styling/admonitions.css");
 

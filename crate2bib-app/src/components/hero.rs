@@ -131,5 +131,14 @@ pub fn Hero() -> Element {
                 }
             }
         }
+        footer {
+            div { class: "middle",
+                a {
+                    class: "nav-item",
+                    href: "https://github.com/jonaspleyer/crate2bib",
+                    img { src: {crate::GITHUB_MARK_WHITE} },
+                }
+            }
+        }
     }
 }
