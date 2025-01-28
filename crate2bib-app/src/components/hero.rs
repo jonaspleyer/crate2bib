@@ -102,7 +102,7 @@ pub fn Hero() -> Element {
     };
 
     rsx! {
-        div { id: "hero",
+        div { id: "hero", class: "middle",
             h1 { "crate2Bib" }
             h3 { "Create a BibLaTeX entry from a given crate and version number." }
             form { onsubmit: move |event| update_form(event),
