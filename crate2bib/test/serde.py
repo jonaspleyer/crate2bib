@@ -20,7 +20,7 @@ async def obtain_result():
     assert origin == 0
 
 
-async def test_empty_version_async():
+async def empty_version_async():
     results = await get_biblatex(
         "cellular-raza", user_agent="crate2bib-py-testing-empty-version"
     )
@@ -32,7 +32,7 @@ def test_serde_1():
 
 
 def test_empty_version():
-    asyncio.run(test_empty_version_async())
+    asyncio.run(empty_version_async())
 
 
 if __name__ == "__main__":
