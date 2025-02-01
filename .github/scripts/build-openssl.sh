@@ -1,9 +1,9 @@
+#!/bin/bash
+# Top-level build script called from Dockerfile
+
 # This file was shamelessly stolen from
 # https://github.com/pypa/manylinux/blob/main/docker/build_scripts/build-openssl.sh
 # licensed under MIT
-
-#!/bin/bash
-# Top-level build script called from Dockerfile
 
 # Stop at any error, show all commands
 set -exuo pipefail
