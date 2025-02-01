@@ -113,7 +113,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter -m crate2bib/Cargo.toml -F openssl_vendored
+          args: --release --out dist --find-interpreter -m crate2bib/Cargo.toml
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
