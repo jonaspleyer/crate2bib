@@ -249,37 +249,36 @@ async fn search_citation_cff(
                 .await?
                 .json::<serde_json::Value>()
                 .await?;
-            let default_branch = response
-                .get("default_branch")
-                .ok_or(serde_json::Error::custom("could not find default branch"))?
-                .to_string()
-                .replace("\"", "");
 
-            let check_files = vec![
-                "CITATION.cff",
-                "CITATION",
-                "Citation.cff",
-                "Citation",
-                "citation.cff",
-                "citation",
-            ];
-            let request_url_base = format!(
-                "https://raw.githubusercontent.com/\
+            if let Some(default_branch) = response.get("default_branch") {
+                let default_branch = default_branch.to_string().replace("\"", "");
+
+                let check_files = vec![
+                    "CITATION.cff",
+                    "CITATION",
+                    "Citation.cff",
+                    "Citation",
+                    "citation.cff",
+                    "citation",
+                ];
+                let request_url_base = format!(
+                    "https://raw.githubusercontent.com/\
                 {owner}/\
                 {repo}/\
                 refs/heads/\
                 {default_branch}"
-            );
-            let requests = check_files.into_iter().map(|f| {
-                let rq = format!("{request_url_base}/{f}");
-                client.get(rq).send()
-            });
-            for response in requests {
-                let response = response.await?.text().await?;
-                if !response.to_lowercase().contains("404: not found") {
-                    return Ok(Some(BibLaTeX::from_citation_cff(
-                        &citeworks_cff::from_str(&response)?,
-                    )?));
+                );
+                let requests = check_files.into_iter().map(|f| {
+                    let rq = format!("{request_url_base}/{f}");
+                    client.get(rq).send()
+                });
+                for response in requests {
+                    let response = response.await?.text().await?;
+                    if !response.to_lowercase().contains("404: not found") {
+                        return Ok(Some(BibLaTeX::from_citation_cff(
+                            &citeworks_cff::from_str(&response)?,
+                        )?));
+                    }
                 }
             }
         }
