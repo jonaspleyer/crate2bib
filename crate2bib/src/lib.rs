@@ -16,7 +16,7 @@
 use pyo3::prelude::*;
 
 use chrono::Datelike;
-use serde::{de::Error, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 /// A fully specified BibLaTeX entry generated from a crate hostedn on [crates.io](https://crates.io)
 #[derive(Clone, Debug, Deserialize, Serialize)]
