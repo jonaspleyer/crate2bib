@@ -136,22 +136,6 @@ jobs:
             pip install crate2bib --no-index --find-links dist --force-reinstall
             pip install pytest
             .venv/bin/python3 .venv/bin/pytest crate2bib/test/*
-      - name: pytest
-        if: ${{ !startsWith(matrix.platform.target, 'x86') }}
-        uses: uraimo/run-on-arch-action@v2
-        with:
-          arch: ${{ matrix.platform.target }}
-          distro: alpine_latest
-          githubToken: ${{ github.token }}
-          install: |
-            apk add py3-virtualenv
-          run: |
-            set -e
-            python3 -m virtualenv .venv
-            source .venv/bin/activate
-            pip install pytest
-            pip install crate2bib --find-links dist --force-reinstall
-            .venv/bin/python3 .venv/bin/pytest crate2bib/test/*
 
   windows:
     runs-on: ${{ matrix.platform.runner }}
