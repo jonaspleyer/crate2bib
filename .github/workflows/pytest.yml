@@ -1,0 +1,39 @@
+name: PyTest
+
+on: [push, pull_request]
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: 'recursive'
+          lfs: 'false'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - name: Create and Activate python3 Environment
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install pytest
+
+      - name: Install With Maturin
+        uses: PyO3/maturin-action@v1
+        with:
+          command: develop
+          args: --release -m crate2bib/Cargo.toml
+
+      - name: Run Tests
+        run: .venv/bin/python3 -m pytest crate2bib/test/*
