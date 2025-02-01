@@ -22,7 +22,7 @@ jobs:
         run: cargo check
 
       - name: DocTest
-        run: cargo test --workspace --exclude crate2bib-py --doc
+        run: cargo test --workspace --doc
 
       - name: Test
-        run: cargo test --workspace --exclude crate2bib-py
+        run: cargo test --workspace
