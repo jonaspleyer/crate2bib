@@ -21,8 +21,6 @@ permissions:
 jobs:
   linux:
     runs-on: ${{ matrix.platform.runner }}
-    env:
-      OPENSSL_DIR: /usr/include/openssl
     strategy:
       matrix:
         platform:
@@ -50,9 +48,6 @@ jobs:
           args: --release --out dist --find-interpreter -m crate2bib/Cargo.toml
           sccache: 'true'
           manylinux: auto
-          before-script-linux: |
-            chmod +x .github/scripts/build-openssl.sh
-            ./.github/scripts/build-openssl.sh
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -86,8 +81,6 @@ jobs:
 
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
-    env:
-      OPENSSL_DIR: /usr/include/openssl
     strategy:
       matrix:
         platform:
@@ -111,9 +104,6 @@ jobs:
           args: --release --out dist --find-interpreter -m crate2bib/Cargo.toml
           sccache: 'true'
           manylinux: musllinux_1_2
-          before-script-linux: |
-            chmod +x .github/scripts/build-openssl.sh
-            ./.github/scripts/build-openssl.sh
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
@@ -223,8 +213,6 @@ jobs:
 
   sdist:
     runs-on: ubuntu-latest
-    env:
-      OPENSSL_DIR: /usr/include/openssl
     steps:
       - uses: actions/checkout@v4
       - name: Build sdist
