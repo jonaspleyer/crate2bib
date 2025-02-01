@@ -21,6 +21,8 @@ permissions:
 jobs:
   linux:
     runs-on: ${{ matrix.platform.runner }}
+    env:
+      OPENSSL_DIR: /opt/openssl
     strategy:
       matrix:
         platform:
@@ -83,6 +85,8 @@ jobs:
 
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
+    env:
+      OPENSSL_DIR: /opt/openssl
     strategy:
       matrix:
         platform:
@@ -217,6 +221,8 @@ jobs:
 
   sdist:
     runs-on: ubuntu-latest
+    env:
+      OPENSSL_DIR: /opt/openssl
     steps:
       - uses: actions/checkout@v4
       - name: Build sdist
