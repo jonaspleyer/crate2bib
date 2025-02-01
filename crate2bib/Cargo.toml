@@ -21,7 +21,7 @@ reqwest = "0.12"
 pyo3 = { version = "0.23", optional = true }
 pyo3-async-runtimes = { version = "0.23", features = ["tokio-runtime"], optional = true }
 citeworks-cff = "0.1"
-openssl = { version = "*", features = ["vendored"]}
+openssl = { version = "*", features = ["vendored"], optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.43.0", features = ["macros"] }
