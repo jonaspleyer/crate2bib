@@ -63,28 +63,51 @@ pub fn Hero() -> Element {
         {
             // TODO rework this; how can we display multiple results?
             Ok(results) => {
-                for (entry, origin) in results {
-                    let (name, link) = match origin {
-                        crate2bib::EntryOrigin::CratesIO => (
+                for entry in results {
+                    let (name, link, version, found_message) = match entry {
+                        crate2bib::BibLaTeX::CratesIO(ref e) => (
                             "crates.io".to_string(),
                             format!("https://crates.io/crates/{crate_name}"),
+                            e.version.as_ref().map(|x| format!("{x}")),
+                            if let Some(v) = &e.version {
+                                format!("{crate_name} {}", v)
+                            } else {
+                                format!("{crate_name}")
+                            },
                         ),
-                        crate2bib::EntryOrigin::CitationCff => (
+                        crate2bib::BibLaTeX::CITATIONCFF(ref e) => (
                             "CITATION.cff".to_string(),
-                            entry.url.clone().unwrap_or_default(),
+                            e.url.clone().map_or("".to_string(), |x| format!("{x}")),
+                            e.version.clone(),
+                            if let Some(v) = &e.version {
+                                format!("{crate_name} {}", v)
+                            } else {
+                                format!("{crate_name}")
+                            },
+                        ),
+                        #[allow(unused)]
+                        crate2bib::BibLaTeX::Bibliography {
+                            ref bibliography,
+                            ref url,
+                            ref filename,
+                        } => (
+                            "bibliography file".to_string(),
+                            url.clone(),
+                            None,
+                            format!("{crate_name}"),
                         ),
                     };
                     let height = format!("{entry}").lines().count() + 5;
-                    let version_found = entry
-                        .version
-                        .as_ref()
-                        .map(|x| format!("{x}"))
-                        .unwrap_or("".to_string());
+                    /* let found_message = entry
+                    .version
+                    .as_ref()
+                    .map(|x| format!("{x}"))
+                    .unwrap_or("".to_string());*/
                     messages.write().push(Success(Props {
                         message: rsx! {
                             p {
                                 "Found entry for "
-                                code { "{crate_name} ({version_found})" }
+                                code { "{found_message})" }
                                 " from "
                                 a { href: link, {name} }
                             }
