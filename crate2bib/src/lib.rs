@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 /// A fully specified BibLaTeX entry generated from a crate hostedn on [crates.io](https://crates.io)
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[cfg_attr(feature = "pyo3", pyclass)]
-pub struct BibLaTeX {
+pub struct BibLaTeXCratesIO {
     /// BibLaTeX citation key which can be used in LaTeX `\cite{key}`.
     pub key: String,
     /// One of BibLaTeX's types. This is usually `software` in our case
@@ -40,7 +40,28 @@ pub struct BibLaTeX {
     pub date: Option<chrono::DateTime<chrono::Utc>>,
 }
 
-impl BibLaTeX {
+/// Contains all variants of how a bib entry can be obtained
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum BibLaTeX {
+    /// Obtained bib entry form [crates.io](https://crates.io)
+    CratesIO(BibLaTeXCratesIO),
+    /// Obtained bib entry from `CITAIION.cff` inside repository.
+    CITATIONCFF(citeworks_cff::Cff),
+}
+
+impl core::fmt::Display for BibLaTeX {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            BibLaTeX::CratesIO(b) => b.fmt(f),
+            BibLaTeX::CITATIONCFF(b) => {
+                let bib = BibLaTeXCratesIO::from_citation_cff(b).unwrap();
+                bib.fmt(f)
+            }
+        }
+    }
+}
+
+impl BibLaTeXCratesIO {
     /// Converts a [CitationCff] file to [BibLaTeX]
     pub fn from_citation_cff(cff: &citeworks_cff::Cff) -> Result<Self, Box<dyn std::error::Error>> {
         #[allow(unused)]
@@ -169,7 +190,7 @@ impl BibLaTeX {
     }
 }
 
-impl std::fmt::Display for BibLaTeX {
+impl std::fmt::Display for BibLaTeXCratesIO {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Writes the biblatex entry
         writeln!(f, "@{} {{{},", self.work_type, self.key)?;
@@ -223,14 +244,14 @@ impl std::error::Error for NotFoundError {
     }
 }
 
-async fn search_citation_cff(
+async fn search_citation_files(
     client: &reqwest::Client,
     repository: &Option<String>,
-) -> Result<Option<BibLaTeX>, Box<dyn std::error::Error>> {
+) -> Result<Vec<BibLaTeX>, Box<dyn std::error::Error>> {
     if let Some(repo) = repository {
         // Check if this is Github
         if !repo.contains("github") {
-            return Ok(None);
+            return Ok(vec![]);
         }
 
         // Make API Call
@@ -253,13 +274,15 @@ async fn search_citation_cff(
             if let Some(default_branch) = response.get("default_branch") {
                 let default_branch = default_branch.to_string().replace("\"", "");
 
+                enum ConvertHow {
+                    Cff,
+                    Bib,
+                }
+                use ConvertHow::*;
                 let check_files = vec![
-                    "CITATION.cff",
-                    "CITATION",
-                    "Citation.cff",
-                    "Citation",
-                    "citation.cff",
-                    "citation",
+                    ("CITATION.cff", Cff),
+                    ("Citation.cff", Cff),
+                    ("citation.cff", Cff),
                 ];
                 let request_url_base = format!(
                     "https://raw.githubusercontent.com/\
@@ -268,43 +291,25 @@ async fn search_citation_cff(
                 refs/heads/\
                 {default_branch}"
                 );
-                let requests = check_files.into_iter().map(|f| {
-                    let rq = format!("{request_url_base}/{f}");
-                    client.get(rq).send()
+                let requests = check_files.into_iter().map(|(filename, how)| {
+                    let rq = format!("{request_url_base}/{filename}");
+                    (client.get(rq).send(), how, filename)
                 });
-                for response in requests {
+                let mut results = vec![];
+                for (response, how, filename) in requests {
                     let response = response.await?.text().await?;
                     if !response.to_lowercase().contains("404: not found") {
-                        return Ok(Some(BibLaTeX::from_citation_cff(
-                            &citeworks_cff::from_str(&response)?,
-                        )?));
+                        match how {
+                            Cff => results
+                                .push(BibLaTeX::CITATIONCFF(citeworks_cff::from_str(&response)?)),
+                        }
                     }
                 }
+                return Ok(results);
             }
         }
     }
-    Ok(None)
-}
-
-/// Describes how the BibLaTeX entry was obtainedj
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "pyo3", pyclass(eq, eq_int))]
-pub enum EntryOrigin {
-    /// Generated from data found on [crates.io](https://crates.io)
-    CratesIO = 0,
-    /// Found citation file in repository
-    CitationCff = 1,
-    // Contains a BibLaTeX entry inside of the README file
-    // ReadmeCitation = 2,
-}
-
-impl core::fmt::Display for EntryOrigin {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            EntryOrigin::CratesIO => f.write_str("crates.io"),
-            EntryOrigin::CitationCff => f.write_str("CITATION.cff"),
-        }
-    }
+    Ok(vec![])
 }
 
 /// Returns a [BibLaTeX] entry for the searched crate.
@@ -316,7 +321,7 @@ pub async fn get_biblatex(
     crate_name: &str,
     version: Option<&str>,
     user_agent: Option<&str>,
-) -> Result<Vec<(BibLaTeX, EntryOrigin)>, Box<dyn std::error::Error>> {
+) -> Result<Vec<BibLaTeX>, Box<dyn std::error::Error>> {
     let mut results = vec![];
     use crates_io_api::AsyncClient;
     use reqwest::header::*;
@@ -357,40 +362,35 @@ pub async fn get_biblatex(
     ))?;
     let found_version = info.versions[index].clone();
 
-    if let Some(bibtex) = search_citation_cff(&client1, &info.crate_data.repository).await? {
-        results.push((bibtex, EntryOrigin::CitationCff));
-    }
+    results.extend(search_citation_files(&client1, &info.crate_data.repository).await?);
 
-    results.push((
-        BibLaTeX {
-            key: format!(
-                "{}{}",
-                found_version
-                    .published_by
-                    .clone()
-                    .and_then(|x| x
-                        .name
-                        .and_then(|x| x.split(" ").nth(1).map(|x| x.to_string())))
-                    .unwrap_or(crate_name.to_string()),
-                info.crate_data.updated_at.year()
-            ),
-            work_type: "software".to_string(),
-            author: found_version
+    results.push(BibLaTeX::CratesIO(BibLaTeXCratesIO {
+        key: format!(
+            "{}{}",
+            found_version
                 .published_by
-                .map_or_else(|| "".to_owned(), |x| x.name.unwrap_or(x.login)),
-            title: info
-                .crate_data
-                .description
-                .map_or(format!("{{{}}}", crate_name), |x| {
-                    format!("{{{}}}: {}", crate_name, x)
-                }),
-            url: info.crate_data.repository,
-            license: found_version.license,
-            version: Some(found_version_semver),
-            date: Some(found_version.updated_at),
-        },
-        EntryOrigin::CratesIO,
-    ));
+                .clone()
+                .and_then(|x| x
+                    .name
+                    .and_then(|x| x.split(" ").nth(1).map(|x| x.to_string())))
+                .unwrap_or(crate_name.to_string()),
+            info.crate_data.updated_at.year()
+        ),
+        work_type: "software".to_string(),
+        author: found_version
+            .published_by
+            .map_or_else(|| "".to_owned(), |x| x.name.unwrap_or(x.login)),
+        title: info
+            .crate_data
+            .description
+            .map_or(format!("{{{}}}", crate_name), |x| {
+                format!("{{{}}}: {}", crate_name, x)
+            }),
+        url: info.crate_data.repository,
+        license: found_version.license,
+        version: Some(found_version_semver),
+        date: Some(found_version.updated_at),
+    }));
     Ok(results)
 }
 
@@ -432,8 +432,7 @@ fn get_biblatex_py(
 #[pymodule]
 fn crate2bib(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_biblatex_py, m)?)?;
-    m.add_class::<BibLaTeX>()?;
-    m.add_class::<EntryOrigin>()?;
+    m.add_class::<BibLaTeXCratesIO>()?;
     Ok(())
 }
 
@@ -444,7 +443,7 @@ mod tests {
     #[tokio::test]
     async fn access_crates_io() -> Result<(), Box<dyn std::error::Error>> {
         let results = get_biblatex("serde", Some("1.0.217"), Some("crate2bib-testing")).await?;
-        let (bib_entry, origin) = &results[0];
+        let bib_entry = &results[0];
         let expected = "\
 @software {Tolnay2024,
     author = {David Tolnay},
@@ -455,18 +454,27 @@ mod tests {
     license = {MIT OR Apache-2.0},
 }";
         assert_eq!(format!("{}", bib_entry), expected);
-        assert_eq!(origin, &EntryOrigin::CratesIO);
+        if let &BibLaTeX::CratesIO(_) = bib_entry {
+        } else {
+            panic!("got wrong return type");
+        }
         Ok(())
     }
 
     #[tokio::test]
     async fn find_citation_cff() -> Result<(), Box<dyn std::error::Error>> {
         let results = get_biblatex("cellular-raza", Some("0.1"), Some("crate2bib-testing")).await?;
-        let (_, origin) = &results[0];
-        assert_eq!(origin, &EntryOrigin::CitationCff);
-        let (bib_entry, origin) = &results[1];
+        let bib_entry = &results[0];
+        match bib_entry {
+            BibLaTeX::CITATIONCFF(_) => (),
+            _ => panic!("Got wrong entry type 1"),
+        }
+        let bib_entry = &results[1];
         println!("{bib_entry}");
-        assert_eq!(origin, &EntryOrigin::CratesIO);
+        match bib_entry {
+            BibLaTeX::CratesIO(_) => (),
+            _ => panic!("Got wrong return type 2"),
+        }
         Ok(())
     }
 
