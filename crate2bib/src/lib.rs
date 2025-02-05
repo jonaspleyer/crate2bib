@@ -47,6 +47,15 @@ pub enum BibLaTeX {
     CratesIO(BibLaTeXCratesIO),
     /// Obtained bib entry from `CITAIION.cff` inside repository.
     CITATIONCFF(citeworks_cff::Cff),
+    /// Obtained bib entry directly from repository.
+    Bibliography {
+        /// Contains the whole bibliography with all keys.
+        bibliography: biblatex::Bibliography,
+        /// Link to the repository
+        url: String,
+        /// Name of the file where the citation was discovered
+        filename: String,
+    },
 }
 
 impl core::fmt::Display for BibLaTeX {
@@ -57,6 +66,12 @@ impl core::fmt::Display for BibLaTeX {
                 let bib = BibLaTeXCratesIO::from_citation_cff(b).unwrap();
                 bib.fmt(f)
             }
+            #[allow(unused)]
+            BibLaTeX::Bibliography {
+                bibliography,
+                url,
+                filename,
+            } => f.write_str(&bibliography.to_biblatex_string()),
         }
     }
 }
@@ -283,6 +298,10 @@ async fn search_citation_files(
                     ("CITATION.cff", Cff),
                     ("Citation.cff", Cff),
                     ("citation.cff", Cff),
+                    ("citation.bib", Bib),
+                    ("Citation.bib", Bib),
+                    ("bibliography.bib", Bib),
+                    ("Bibliography.bib", Bib),
                 ];
                 let request_url_base = format!(
                     "https://raw.githubusercontent.com/\
@@ -302,6 +321,15 @@ async fn search_citation_files(
                         match how {
                             Cff => results
                                 .push(BibLaTeX::CITATIONCFF(citeworks_cff::from_str(&response)?)),
+
+                            Bib => results.push(BibLaTeX::Bibliography {
+                                bibliography: biblatex::Bibliography::parse(&response)
+                                    .map_err::<Box<dyn std::error::Error>, _>(|e| {
+                                        format!("{e}").into()
+                                    })?,
+                                url: request_url_base.clone(),
+                                filename: filename.to_string(),
+                            }),
                         }
                     }
                 }

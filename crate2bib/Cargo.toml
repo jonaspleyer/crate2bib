@@ -22,6 +22,7 @@ pyo3 = { workspace = true, optional = true }
 pyo3-async-runtimes = { version = "0.23", features = ["tokio-runtime"], optional = true }
 citeworks-cff = "0.1"
 openssl = { version = ">=0", features = ["vendored"], optional = true }
+biblatex = { version = "0.10.0", features = ["serde"] }
 
 [dev-dependencies]
 tokio = { version = "1.43.0", features = ["macros"] }
