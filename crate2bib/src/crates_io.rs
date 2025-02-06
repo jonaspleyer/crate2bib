@@ -267,8 +267,7 @@ pub async fn get_biblatex(
 
     let client1 = reqwest::Client::builder()
         .default_headers(headers)
-        .build()
-        .unwrap();
+        .build()?;
     let client =
         AsyncClient::with_http_client(client1.clone(), web_time::Duration::from_millis(1000));
     let r1 = crates_io_generate_biblatex(crate_name, version, &client).await?;
