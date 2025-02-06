@@ -6,7 +6,7 @@ async def obtain_result():
     results = await get_biblatex(
         "serde", "1.0", "crate2bib-py-testing-serde-user-agent"
     )
-    biblatex, origin = results[0]
+    biblatex = results[0]
     expected = "\
 @software {Tolnay2024,\n\
     author = {David Tolnay},\n\
@@ -17,7 +17,6 @@ async def obtain_result():
     license = {MIT OR Apache-2.0},\n\
 }"
     assert biblatex == expected
-    assert origin == 0
 
 
 async def empty_version_async():
