@@ -58,6 +58,8 @@ pub fn Hero() -> Element {
                 }
             }),
             None,
+            None,
+            vec!["CITATION.cff", "citation.bib"],
         )
         .await
         {
@@ -86,23 +88,18 @@ pub fn Hero() -> Element {
                             },
                         ),
                         #[allow(unused)]
-                        crate2bib::BibLaTeX::Bibliography {
+                        crate2bib::BibLaTeX::Plain(crate2bib::PlainBibLaTeX {
                             ref bibliography,
-                            ref url,
+                            ref repository,
                             ref filename,
-                        } => (
+                        }) => (
                             "bibliography file".to_string(),
-                            url.clone(),
+                            repository.clone(),
                             None,
                             format!("{crate_name}"),
                         ),
                     };
                     let height = format!("{entry}").lines().count() + 5;
-                    /* let found_message = entry
-                    .version
-                    .as_ref()
-                    .map(|x| format!("{x}"))
-                    .unwrap_or("".to_string());*/
                     messages.write().push(Success(Props {
                         message: rsx! {
                             p {
