@@ -8,6 +8,9 @@
 
 mod crates_io;
 mod github;
+#[cfg_attr(docsrs, doc(cfg(feature = "pyo3")))]
+#[cfg(feature = "pyo3")]
+mod python;
 mod types;
 
 pub use crates_io::*;
