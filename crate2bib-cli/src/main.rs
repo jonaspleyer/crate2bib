@@ -14,35 +14,76 @@ struct Args {
     crate_name: String,
     /// A semver compliant version number (eg. "1", 0.1", "0.3.38").
     #[arg(short, long, default_value = "")]
-    version: String,
+    ver: String,
     /// The name of the user-agent. Automation tools
     /// should specify this variable to specify which
     /// user generates the requests.
-    #[arg(short, long, default_value_t = format!("crate2bib-cli-user-agent"), verbatim_doc_comment)]
+    #[arg(
+        short,
+        long,
+        default_value_t = format!("crate2bib-cli-user-agent"),
+        verbatim_doc_comment
+    )]
     user_agent: String,
+    #[arg(long, default_values_t = [
+        "CITATION.cff".to_string(),
+        "citation.bib".to_string(),
+    ])]
+    filenames: Vec<String>,
+    #[arg(short, long, default_value = "")]
+    branch_name: String,
 }
 
 #[async_std::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> crate2bib::Result<()> {
     let args = Args::parse();
+    let filenames = args.filenames.iter().map(|x| x.as_str()).collect();
     let results = crate2bib::get_biblatex(
         &args.crate_name,
-        if args.version.is_empty() {
+        if args.ver.is_empty() {
             None
         } else {
-            Some(args.version.as_str())
+            Some(&args.ver)
         },
-        Some(&args.user_agent),
+        if args.user_agent.is_empty() {
+            None
+        } else {
+            Some(&args.user_agent)
+        },
+        if args.branch_name.is_empty() {
+            None
+        } else {
+            Some(&args.branch_name)
+        },
+        filenames,
     )
     .await?;
-    for (biblatex, origin) in results {
-        match origin {
-            crate2bib::EntryOrigin::CitationCff => {
-                println!("Obtained from CITATION file in repository")
+
+    for result in results {
+        match result {
+            crate2bib::BibLaTeX::CITATIONCFF(ref b) => {
+                println!(
+                    "Generated from CITATION.cff file in repository {}",
+                    b.repository
+                        .as_ref()
+                        .map_or("".to_string(), |x| format!("{x}"))
+                )
             }
-            crate2bib::EntryOrigin::CratesIO => println!("Obtained from crates.io information"),
+            crate2bib::BibLaTeX::CratesIO(_) => {
+                println!("Generated enty from crates.io information")
+            }
+            #[allow(unused)]
+            crate2bib::BibLaTeX::Plain(crate2bib::PlainBibLaTeX {
+                ref bibliography,
+                ref repository,
+                ref filename,
+            }) => {
+                println!(
+                    "Obtained bibliography {filename} file directly from repository {repository}"
+                )
+            }
         }
-        println!("{biblatex}");
+        println!("{result}");
     }
     Ok(())
 }
