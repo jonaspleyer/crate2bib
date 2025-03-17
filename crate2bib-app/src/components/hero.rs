@@ -37,7 +37,7 @@ pub fn Note(props: Props) -> Element {
 pub fn Hero() -> Element {
     let mut messages = use_signal(|| circ_buffer::RingBuffer::<_, 8>::new());
 
-    let mut update_form = move |event: Event<FormData>| async move {
+    let update_form = move |event: Event<FormData>| async move {
         let values: std::collections::HashMap<_, _> = event
             .data
             .values()
@@ -66,11 +66,11 @@ pub fn Hero() -> Element {
             // TODO rework this; how can we display multiple results?
             Ok(results) => {
                 for entry in results {
-                    let (name, link, version, found_message) = match entry {
+                    let (name, link, found_message) = match entry {
                         crate2bib::BibLaTeX::CratesIO(ref e) => (
                             "crates.io".to_string(),
                             format!("https://crates.io/crates/{crate_name}"),
-                            e.version.as_ref().map(|x| format!("{x}")),
+                            // e.version.as_ref().map(|x| format!("{x}")),
                             if let Some(v) = &e.version {
                                 format!("{crate_name} {}", v)
                             } else {
@@ -80,7 +80,7 @@ pub fn Hero() -> Element {
                         crate2bib::BibLaTeX::CITATIONCFF(ref e) => (
                             "CITATION.cff".to_string(),
                             e.url.clone().map_or("".to_string(), |x| format!("{x}")),
-                            e.version.clone(),
+                            // e.version.clone(),
                             if let Some(v) = &e.version {
                                 format!("{crate_name} {}", v)
                             } else {
@@ -95,7 +95,7 @@ pub fn Hero() -> Element {
                         }) => (
                             "bibliography file".to_string(),
                             repository.clone(),
-                            None,
+                            // None,
                             format!("{crate_name}"),
                         ),
                     };
