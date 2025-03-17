@@ -156,7 +156,7 @@ pub fn Hero() -> Element {
                 a {
                     class: "nav-item",
                     href: "https://github.com/jonaspleyer/crate2bib",
-                    img { src: {crate::GITHUB_MARK_WHITE} },
+                    img { src: crate::GITHUB_MARK_WHITE },
                 }
             }
         }
