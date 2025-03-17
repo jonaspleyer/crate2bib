@@ -131,7 +131,7 @@ pub fn Hero() -> Element {
                     r#type: "text",
                     value: "cellular-raza",
                 }
-                input { name: "version", r#type: "text", value: "0.1" }
+                input { name: "version", r#type: "text", value: "0.2" }
                 input { value: "Generate", r#type: "submit" }
             }
             h2 { "BibLaTeX Citation" }
