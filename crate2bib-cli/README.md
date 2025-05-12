@@ -1,3 +1,9 @@
+[![Crates.io Version](https://img.shields.io/crates/v/crate2bib-cli?style=flat-square)](https://crates.io/crates/crate2bib-cli)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jonaspleyer/crate2bib/webapp.yml?style=flat-square&label=Build)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jonaspleyer/crate2bib/test.yml?style=flat-square&label=Test)
+
+# crate2bib - cli
+
 Converts a given crate and version number to a BibTeX entry.
 See also the [rust library](https://crates.io/crates/crate2bib) which also provides
 [python bindings](https://pypi.org/project/crate2bib/).
