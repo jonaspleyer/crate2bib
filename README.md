@@ -17,4 +17,4 @@ Visit [jonaspleyer/.github.io/crate2bib](https://jonaspleyer.github.io/crate2bib
 
 # crate2bib - Cli
 A cli utility to quickly generate BibTeX entries.
-See [crate2bib-cli](https://github.com/jonaspleyer/tree/main/crate2bib-cli).
+See [crate2bib-cli](https://github.com/jonaspleyer/crate2bib/tree/main/crate2bib-cli).
