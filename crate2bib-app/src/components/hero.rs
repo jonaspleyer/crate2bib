@@ -74,7 +74,7 @@ pub fn Hero() -> Element {
                             if let Some(v) = &e.version {
                                 format!("{crate_name} {}", v)
                             } else {
-                                format!("{crate_name}")
+                                crate_name.clone()
                             },
                         ),
                         crate2bib::BibLaTeX::CITATIONCFF(ref e) => (
@@ -84,7 +84,7 @@ pub fn Hero() -> Element {
                             if let Some(v) = &e.version {
                                 format!("{crate_name} {}", v)
                             } else {
-                                format!("{crate_name}")
+                                crate_name.clone()
                             },
                         ),
                         #[allow(unused)]
@@ -96,7 +96,7 @@ pub fn Hero() -> Element {
                             "bibliography file".to_string(),
                             repository.clone(),
                             // None,
-                            format!("{crate_name}"),
+                            crate_name.clone(),
                         ),
                     };
                     let height = format!("{entry}").lines().count() + 5;
