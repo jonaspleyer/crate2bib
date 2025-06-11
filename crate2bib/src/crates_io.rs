@@ -191,7 +191,7 @@ impl std::fmt::Display for BibLaTeXCratesIO {
 /// ## Note
 /// crates.io requires the specification of a user-agent
 /// but this may yield errors when calling from a static website due to CORS.
-pub async fn crates_io_generate_biblatex(
+pub async fn generate_biblatex_crates_io(
     crate_name: &str,
     version: Option<&str>,
     client: &crates_io_api::AsyncClient,
@@ -250,7 +250,7 @@ pub async fn crates_io_generate_biblatex(
     })
 }
 
-/// Tries to retrieve a BibLaTeX entry for
+/// Obtain multiple BibLaTeX entries from various sources such as crates.io, github and doi.org
 pub async fn get_biblatex(
     crate_name: &str,
     version: Option<&str>,
@@ -270,7 +270,7 @@ pub async fn get_biblatex(
         .build()?;
     let client =
         AsyncClient::with_http_client(client1.clone(), web_time::Duration::from_millis(1000));
-    let r1 = crates_io_generate_biblatex(crate_name, version, &client).await?;
+    let r1 = generate_biblatex_crates_io(crate_name, version, &client).await?;
     let url = r1.url.clone();
 
     let mut results = vec![crate::BibLaTeX::CratesIO(r1)];

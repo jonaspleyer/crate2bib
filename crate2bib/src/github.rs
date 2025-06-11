@@ -60,7 +60,7 @@ async fn response_to_biblatex(
     Ok(results)
 }
 
-/// Searches the repository at [github.com] for citation files
+/// Searches the repository at [github.com](https://github.com) for citation files
 pub async fn github_search_files(
     client: &reqwest::Client,
     repository: &str,
