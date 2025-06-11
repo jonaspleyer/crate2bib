@@ -74,6 +74,12 @@ impl From<Err> for PyErr {
     }
 }
 
+impl From<biblatex::ParseError> for Err {
+    fn from(value: biblatex::ParseError) -> Self {
+        Err::BibLaTeXParsing(value)
+    }
+}
+
 /// Contains all variants of how a bib entry can be obtained
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum BibLaTeX {
