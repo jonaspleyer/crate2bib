@@ -13,4 +13,4 @@ path = "src/main.rs"
 [dependencies]
 async-std = { version = "1.13", features = ["attributes", "tokio1"] }
 clap = { version = "4.5.26", features = ["derive"] }
-crate2bib = { version = "0.4", path = "../crate2bib/"}
+crate2bib = { version = "0.5", path = "../crate2bib/"}
