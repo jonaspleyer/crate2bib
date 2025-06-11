@@ -102,3 +102,14 @@ impl core::fmt::Display for BibLaTeX {
         }
     }
 }
+
+impl BibLaTeX {
+    pub(crate) const fn priority(&self) -> u8 {
+        use BibLaTeX::*;
+        match self {
+            CratesIO(_) => 20,
+            CITATIONCFF(_) => 10,
+            Plain(_) => 50,
+        }
+    }
+}

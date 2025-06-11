@@ -278,6 +278,7 @@ pub async fn get_biblatex(
         results
             .extend(crate::github_search_files(&client1, &u, filenames, branch_name, true).await?);
     }
+    results.sort_by_key(|x| u8::MAX - x.priority());
 
     Ok(results)
 }
@@ -326,14 +327,18 @@ mod tests {
         .await?;
         let bib_entry = &results[0];
         match bib_entry {
-            BibLaTeX::CratesIO(_) => (),
+            BibLaTeX::Plain(_) => (),
             _ => panic!("Got wrong entry type 1"),
         }
         let bib_entry = &results[1];
-        println!("{bib_entry}");
+        match bib_entry {
+            BibLaTeX::CratesIO(_) => (),
+            _ => panic!("Got wrong return type 2"),
+        }
+        let bib_entry = &results[2];
         match bib_entry {
             BibLaTeX::CITATIONCFF(_) => (),
-            _ => panic!("Got wrong return type 2"),
+            _ => panic!("Got wrong return type 3"),
         }
         Ok(())
     }
