@@ -275,12 +275,8 @@ pub async fn get_biblatex(
 
     let mut results = vec![crate::BibLaTeX::CratesIO(r1)];
     if let Some(u) = url {
-        let more_results = crate::github_search_files(&client1, &u, filenames, branch_name).await?;
-        for r in more_results {
-            if let Some(q) = r.await? {
-                results.push(q);
-            }
-        }
+        results
+            .extend(crate::github_search_files(&client1, &u, filenames, branch_name, true).await?);
     }
 
     Ok(results)

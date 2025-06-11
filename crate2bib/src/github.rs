@@ -6,26 +6,36 @@ async fn response_to_biblatex(
     response: impl Future<Output = Result<reqwest::Response, reqwest::Error>>,
     repository: String,
     filename: String,
-) -> crate::Result<Option<crate::BibLaTeX>> {
+    search_doi: bool,
+) -> crate::Result<Vec<crate::BibLaTeX>> {
     let text = response.await?.text().await?;
     if text.to_lowercase().contains("404: not found") {
-        return Ok(None);
+        return Ok(vec![]);
     }
     let chunks: Vec<_> = filename.split(".").collect();
     let extension = chunks.get(1);
+    let mut results = vec![];
     match extension {
-        Some(&"bib") => Ok(Some(BibLaTeX::Plain(PlainBibLaTeX {
+        Some(&"bib") => results.push(BibLaTeX::Plain(PlainBibLaTeX {
             bibliography: biblatex::Bibliography::parse(&text)
                 .map_err(crate::Err::BibLaTeXParsing)?,
             repository,
             filename,
-        }))),
-        Some(&"cff") => Ok(Some(BibLaTeX::CITATIONCFF(citeworks_cff::from_str(&text)?))),
-        None => todo!(),
-        Some(x) => Err(crate::Err::FiletypeUnsupported(format!(
-            "the {x} filetype is currently not supported"
-        ))),
+        })),
+        Some(&"cff") => {
+            // Try to obtain plain BibLaTeX entry from doi
+            let citation_cff = citeworks_cff::from_str(&text)?;
+            results.push(BibLaTeX::CITATIONCFF(citation_cff))
+        }
+        None => (),
+        Some(x) => {
+            return Err(crate::Err::FiletypeUnsupported(format!(
+                "the {x} filetype is currently not supported"
+            )))
+        }
     }
+
+    Ok(results)
 }
 
 /// Searches the repository at [github.com] for citation files
@@ -34,7 +44,8 @@ pub async fn github_search_files(
     repository: &str,
     filenames: Vec<&str>,
     branch_name: Option<&str>,
-) -> crate::Result<Vec<impl Future<Output = crate::Result<Option<crate::BibLaTeX>>>>> {
+    search_doi: bool,
+) -> crate::Result<Vec<crate::BibLaTeX>> {
     // Check if this is Github
     if !repository.contains("github") {
         return Ok(vec![]);
@@ -76,14 +87,21 @@ pub async fn github_search_files(
                     refs/heads/\
                     {branch_name}"
             );
-            return Ok(filenames
-                .into_iter()
-                .map(|filename| {
-                    let rq = format!("{request_url_base}/{filename}");
-                    let file_content = client.get(&rq).send();
-                    response_to_biblatex(file_content, rq, filename.to_string())
-                })
-                .collect());
+            let mut results = vec![];
+            for filename in filenames.iter() {
+                let rq = format!("{request_url_base}/{filename}");
+                let file_content = client.get(&rq).send();
+                let r = response_to_biblatex(
+                    client.clone(),
+                    file_content,
+                    rq,
+                    filename.to_string(),
+                    search_doi,
+                )
+                .await?;
+                results.extend(r);
+            }
+            return Ok(results);
         }
     }
     Ok(vec![])
