@@ -65,7 +65,7 @@ pub fn Hero() -> Element {
         {
             // TODO rework this; how can we display multiple results?
             Ok(results) => {
-                for entry in results {
+                for entry in results.into_iter().rev() {
                     let (name, link, found_message) = match entry {
                         crate2bib::BibLaTeX::CratesIO(ref e) => (
                             "crates.io".to_string(),
