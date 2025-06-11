@@ -3,6 +3,7 @@ use std::future::Future;
 use crate::{BibLaTeX, PlainBibLaTeX};
 
 async fn response_to_biblatex(
+    client: reqwest::Client,
     response: impl Future<Output = Result<reqwest::Response, reqwest::Error>>,
     repository: String,
     filename: String,
@@ -25,6 +26,27 @@ async fn response_to_biblatex(
         Some(&"cff") => {
             // Try to obtain plain BibLaTeX entry from doi
             let citation_cff = citeworks_cff::from_str(&text)?;
+            if search_doi {
+                if let Some(doi) = citation_cff
+                    .preferred_citation
+                    .as_ref()
+                    .and_then(|p| p.doi.as_ref())
+                {
+                    match crate::get_bibtex_doi(doi, client).await {
+                        Ok(Some(bib)) => results.push(crate::BibLaTeX::Plain(PlainBibLaTeX {
+                            bibliography: bib,
+                            repository,
+                            filename,
+                        })),
+                        Ok(None) => (),
+                        Err(e) => {
+                            // Do logging here
+                            // println!("{e}");
+                        }
+                    }
+                }
+            }
+
             results.push(BibLaTeX::CITATIONCFF(citation_cff))
         }
         None => (),

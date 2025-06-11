@@ -7,6 +7,7 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod crates_io;
+mod doi;
 mod github;
 #[cfg_attr(docsrs, doc(cfg(feature = "pyo3")))]
 #[cfg(feature = "pyo3")]
@@ -14,5 +15,6 @@ mod python;
 mod types;
 
 pub use crates_io::*;
+pub use doi::*;
 pub use github::*;
 pub use types::*;
