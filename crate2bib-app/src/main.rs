@@ -16,6 +16,9 @@ pub(crate) enum ColorMode {
 }
 
 fn main() {
+    if tracing_log::LogTracer::init().is_err() {
+        println!("Could not set up logger");
+    }
     launch(App);
 }
 

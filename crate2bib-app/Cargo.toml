@@ -8,8 +8,10 @@ edition = "2021"
 
 [dependencies]
 dioxus = { version = "0.6.0", features = ["router"] }
-crate2bib = { path = "../crate2bib" }
+crate2bib = { path = "../crate2bib", features = ["log"] }
 circ_buffer = "0.1.9"
+log.workspace = true
+tracing-log = "0.2.0"
 
 [features]
 default = ["web"]
