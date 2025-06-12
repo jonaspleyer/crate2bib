@@ -89,6 +89,7 @@ pub async fn github_search_files(
         return Ok(Vec::new());
     }
 
+    let mut results = vec![];
     let segments: Vec<_> = repository.split("github.com/").collect();
     if let Some(tail) = segments.get(1) {
         let segments2: Vec<_> = tail.split("/").collect();
@@ -126,7 +127,6 @@ pub async fn github_search_files(
                     refs/heads/\
                     {branch_name}"
             );
-            let mut results = vec![];
             for filename in filenames.iter() {
                 let rq = format!("{request_url_base}/{filename}");
                 #[cfg(feature = "log")]
@@ -144,8 +144,7 @@ pub async fn github_search_files(
                 .await?;
                 results.extend(r);
             }
-            return Ok(results);
         }
     }
-    Ok(vec![])
+    Ok(results)
 }
