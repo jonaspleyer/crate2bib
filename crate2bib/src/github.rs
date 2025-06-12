@@ -137,7 +137,7 @@ pub async fn github_search_files(
                 let r = response_to_biblatex(
                     client.clone(),
                     file_content,
-                    rq,
+                    repository.to_string(),
                     filename.to_string(),
                     search_doi,
                 )
