@@ -11,10 +11,17 @@ async fn response_to_biblatex(
 ) -> crate::Result<Vec<crate::BibLaTeX>> {
     let text = response.await?.text().await?;
     if text.to_lowercase().contains("404: not found") {
+        #[cfg(feature = "log")]
+        log::warn!(
+            "Could not find file \"{filename}\" in repository \"{repository}\". \
+            Skipping this file.",
+        );
         return Ok(vec![]);
     }
     let chunks: Vec<_> = filename.split(".").collect();
     let extension = chunks.get(1);
+    #[cfg(feature = "log")]
+    log::trace!("Checking file extensions in repository");
     let mut results = vec![];
     match extension {
         Some(&"bib") => results.push(BibLaTeX::Plain(PlainBibLaTeX {
@@ -40,8 +47,8 @@ async fn response_to_biblatex(
                         })),
                         Ok(None) => (),
                         Err(e) => {
-                            // Do logging here
-                            // println!("{e}");
+                            #[cfg(feature = "log")]
+                            log::warn!("Received error: \"{e}\" during doi.org request.");
                         }
                     }
                 }
@@ -70,9 +77,15 @@ pub async fn github_search_files(
 ) -> crate::Result<Vec<crate::BibLaTeX>> {
     // Check if this is Github
     if !repository.contains("github") {
+        #[cfg(feature = "log")]
+        log::warn!("Cannot query {repository}");
+        #[cfg(feature = "log")]
+        log::warn!("Currently only github repositories are supported.");
         return Ok(vec![]);
     }
     if filenames.is_empty() {
+        #[cfg(feature = "log")]
+        log::info!("Did not find any matching filenames");
         return Ok(Vec::new());
     }
 
@@ -96,8 +109,12 @@ pub async fn github_search_files(
                     .await?;
 
                 if let Some(default_branch) = respose.get("default_branch") {
+                    #[cfg(feature = "log")]
+                    log::trace!("Determined default branch {default_branch}");
                     default_branch.to_string().replace("\"", "")
                 } else {
+                    #[cfg(feature = "log")]
+                    log::info!("Automatically chose default branch \"main\"");
                     "main".to_string()
                 }
             };
@@ -112,7 +129,11 @@ pub async fn github_search_files(
             let mut results = vec![];
             for filename in filenames.iter() {
                 let rq = format!("{request_url_base}/{filename}");
+                #[cfg(feature = "log")]
+                log::trace!("Requesting github information for file \"{rq}\"");
                 let file_content = client.get(&rq).send();
+                #[cfg(feature = "log")]
+                log::trace!("Converting response to BibLaTeX");
                 let r = response_to_biblatex(
                     client.clone(),
                     file_content,

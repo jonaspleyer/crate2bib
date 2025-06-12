@@ -30,6 +30,8 @@ pub struct BibLaTeXCratesIO {
 impl BibLaTeXCratesIO {
     /// Creates a [BibLaTeXCratesIO] from a given [citeworks_cff::Cff] file
     pub fn from_citation_cff(cff: &citeworks_cff::Cff) -> Result<Self, Box<dyn std::error::Error>> {
+        #[cfg(feature = "log")]
+        log::trace!("Converting CITATION.cff to BibLaTeX");
         #[allow(unused)]
         let citeworks_cff::Cff {
             cff_version,
@@ -57,6 +59,8 @@ impl BibLaTeXCratesIO {
         let version = version.and_then(|v| semver::Version::parse(&v).ok());
         let date = date_released.and_then(
             |citeworks_cff::Date { year, month, day }| -> Option<chrono::DateTime<chrono::Utc>> {
+                #[cfg(feature = "log")]
+                log::trace!("Found release date");
                 Some(
                     chrono::NaiveDate::from_ymd_opt(year as i32, month as u32, day as u32)?
                         .and_hms_opt(0, 0, 0)?
@@ -64,6 +68,8 @@ impl BibLaTeXCratesIO {
                 )
             },
         );
+        #[cfg(feature = "log")]
+        log::trace!("Formatting Key");
         let key = format!(
             "{}{}",
             authors
@@ -79,6 +85,8 @@ impl BibLaTeXCratesIO {
                 .map(|d| format!("{:4}", d.year))
                 .unwrap_or("".to_owned())
         );
+        #[cfg(feature = "log")]
+        log::trace!("Formatting Authors");
         let author = authors
             .into_iter()
             .map(|author| {
@@ -113,6 +121,8 @@ impl BibLaTeXCratesIO {
             })
             .reduce(|acc, x| format!("{acc}, {x}"))
             .unwrap_or_default();
+        #[cfg(feature = "log")]
+        log::trace!("Finishing Conversion");
         Ok(Self {
             key,
             work_type: match work_type {
@@ -158,6 +168,8 @@ impl BibLaTeXCratesIO {
 
 impl std::fmt::Display for BibLaTeXCratesIO {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        #[cfg(feature = "log")]
+        log::trace!("Formatting BibLaTeXCratesIO");
         // Writes the biblatex entry
         writeln!(f, "@{} {{{},", self.work_type, self.key)?;
         writeln!(f, "    author = {{{}}},", self.author)?;
@@ -196,7 +208,11 @@ pub async fn generate_biblatex_crates_io(
     version: Option<&str>,
     client: &crates_io_api::AsyncClient,
 ) -> crate::Result<BibLaTeXCratesIO> {
+    #[cfg(feature = "log")]
+    log::trace!("Obtaining Crate Information");
     let info = client.get_crate(crate_name).await?;
+    #[cfg(feature = "log")]
+    log::trace!("Filter versions");
     let mut obtained_versions = info
         .versions
         .iter()
@@ -221,6 +237,8 @@ pub async fn generate_biblatex_crates_io(
     ))?;
     let found_version = info.versions[index].clone();
 
+    #[cfg(feature = "log")]
+    log::trace!("Bundling Information into BibLaTeXCratesIO");
     Ok(BibLaTeXCratesIO {
         key: format!(
             "{}{}",
@@ -260,6 +278,8 @@ pub async fn get_biblatex(
 ) -> crate::Result<Vec<crate::BibLaTeX>> {
     use crates_io_api::AsyncClient;
     use reqwest::header::*;
+    #[cfg(feature = "log")]
+    log::trace!("Prepare Headers and Client");
     let mut headers = HeaderMap::new();
     if let Some(ua) = user_agent {
         headers.insert(USER_AGENT, HeaderValue::from_str(ua)?);
@@ -273,11 +293,17 @@ pub async fn get_biblatex(
     let r1 = generate_biblatex_crates_io(crate_name, version, &client).await?;
     let url = r1.url.clone();
 
+    #[cfg(feature = "log")]
+    log::trace!("Obtain entry from crates.io");
     let mut results = vec![crate::BibLaTeX::CratesIO(r1)];
+    #[cfg(feature = "log")]
+    log::trace!("Obtain other entries");
     if let Some(u) = url {
         results
             .extend(crate::github_search_files(&client1, &u, filenames, branch_name, true).await?);
     }
+    #[cfg(feature = "log")]
+    log::trace!("Sort obtained entries by priority");
     results.sort_by_key(|x| u8::MAX - x.priority());
 
     Ok(results)
