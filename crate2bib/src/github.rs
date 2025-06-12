@@ -10,7 +10,7 @@ async fn response_to_biblatex(
     search_doi: bool,
 ) -> crate::Result<Vec<crate::BibLaTeX>> {
     let text = response.await?.text().await?;
-    if text.to_lowercase().contains("404: not found") {
+    if text.to_lowercase().trim() == "404: not found" {
         #[cfg(feature = "log")]
         log::warn!(
             "Could not find file \"{filename}\" in repository \"{repository}\". \
