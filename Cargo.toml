@@ -16,6 +16,7 @@ serde_json = "1.0"
 semver = { version = "1.0", features = [ "serde" ] }
 pyo3 = { version = "0.25" }
 reqwest = { version = "0.12" }
+log = { version = "0.4"}
 
 [profile.wasm-dev]
 inherits = "dev"
