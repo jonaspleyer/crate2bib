@@ -36,6 +36,8 @@ struct Args {
 
 #[async_std::main]
 async fn main() -> crate2bib::Result<()> {
+    env_logger::init();
+
     let args = Args::parse();
     let filenames = args.filenames.iter().map(|x| x.as_str()).collect();
     let results = crate2bib::get_biblatex(
