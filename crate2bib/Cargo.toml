@@ -22,7 +22,7 @@ pyo3 = { workspace = true, optional = true }
 pyo3-async-runtimes = { version = ">=0.22", features = ["tokio-runtime"], optional = true }
 citeworks-cff = "0.1"
 openssl = { version = ">=0", features = ["vendored"], optional = true }
-biblatex = { version = "0.10.0", features = ["serde"] }
+biblatex = { version = "0.11.0", features = ["serde"] }
 thiserror = "2.0.11"
 serde_yaml = "0.9"
 log = { workspace = true, optional = true }
