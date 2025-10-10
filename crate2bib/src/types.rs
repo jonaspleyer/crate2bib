@@ -104,7 +104,12 @@ impl core::fmt::Display for BibLaTeX {
                 bibliography,
                 repository: url,
                 filename,
-            }) => f.write_str(&bibliography.to_biblatex_string()),
+            }) => {
+                let mut output = bibliography.to_biblatex_string();
+                let output = output.replace(",\n", ",\n    ");
+                let output = output.replace(",\n    }", ",\n}");
+                f.write_str(&output)
+            }
         }
     }
 }
