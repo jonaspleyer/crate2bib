@@ -65,6 +65,9 @@ pub enum Err {
     /// Wraps [biblatex::ParseError]
     #[error("error during parsing of BibLaTeX file")]
     BibLaTeXParsing(biblatex::ParseError),
+    /// Wraps [base64::DecodeError]
+    #[error("error during decoding")]
+    Base64DecodeError(#[from] base64::DecodeError),
 }
 
 #[cfg(feature = "pyo3")]

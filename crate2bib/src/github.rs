@@ -2,22 +2,54 @@ use std::future::Future;
 
 use crate::{BibLaTeX, PlainBibLaTeX};
 
+#[derive(Clone, Copy)]
+enum Host {
+    Github,
+    Codeberg,
+}
+
+impl Host {
+    fn as_str(&self) -> &str {
+        match self {
+            Host::Github => "github.com/",
+            Host::Codeberg => "codeberg.org/",
+        }
+    }
+}
+
 async fn response_to_biblatex(
     client: reqwest::Client,
     response: impl Future<Output = Result<reqwest::Response, reqwest::Error>>,
     repository: String,
     filename: String,
     search_doi: bool,
+    host: Host,
 ) -> crate::Result<Vec<crate::BibLaTeX>> {
-    let text = response.await?.text().await?;
-    if text.to_lowercase().trim() == "404: not found" {
-        #[cfg(feature = "log")]
-        log::warn!(
-            "Could not find file \"{filename}\" in repository \"{repository}\". \
-            Skipping this file.",
-        );
-        return Ok(vec![]);
-    }
+    let text = match host {
+        Host::Github => {
+            let text = response.await?.text().await?;
+            if text.to_lowercase().trim() == "404: not found" {
+                #[cfg(feature = "log")]
+                log::warn!(
+                    "Could not find file \"{filename}\" in repository \"{repository}\". \
+                        Skipping this file.",
+                );
+                return Ok(vec![]);
+            }
+            text
+        }
+        Host::Codeberg => {
+            use base64::Engine;
+            let json = response.await?.json::<serde_json::Value>().await?;
+            if let Some(content) = json.get("content") {
+                let content = content.as_str().unwrap_or_default();
+                let bytes = base64::prelude::BASE64_STANDARD.decode(content).unwrap();
+                String::from_utf8(bytes).unwrap()
+            } else {
+                return Ok(vec![]);
+            }
+        }
+    };
     let chunks: Vec<_> = filename.split(".").collect();
     let extension = chunks.get(1);
     #[cfg(feature = "log")]
@@ -76,13 +108,40 @@ pub async fn github_search_files(
     search_doi: bool,
 ) -> crate::Result<Vec<crate::BibLaTeX>> {
     // Check if this is Github
-    if !repository.contains("github") {
+    let (host, api_url) = if repository.contains("github.com/") {
+        (Host::Github, "https://api.github.com/repos")
+    } else if repository.contains("codeberg.org/") {
+        (Host::Codeberg, "https://codeberg.org/api/v1/repos")
+    } else {
         #[cfg(feature = "log")]
         log::warn!("Cannot query {repository}");
         #[cfg(feature = "log")]
-        log::warn!("Currently only github repositories are supported.");
+        log::warn!("Currently only github & codeberg repositories are supported.");
         return Ok(vec![]);
-    }
+    };
+
+    let content_url_formatter = |owner, repo, branch_name, filename| {
+        if repository.contains("github") {
+            format!(
+                "https://raw.githubusercontent.com/\
+                    {owner}/\
+                    {repo}/\
+                    refs/heads/\
+                    {branch_name}/\
+                    {filename}"
+            )
+        } else {
+            format!(
+                "https://codeberg.org/api/v1/repos/\
+                    {owner}/\
+                    {repo}/\
+                    contents/\
+                    {filename}/\
+                    ?ref={branch_name}"
+            )
+        }
+    };
+
     if filenames.is_empty() {
         #[cfg(feature = "log")]
         log::info!("Did not find any matching filenames");
@@ -90,13 +149,13 @@ pub async fn github_search_files(
     }
 
     let mut results = vec![];
-    let segments: Vec<_> = repository.split("github.com/").collect();
+    let segments: Vec<_> = repository.split(host.as_str()).collect();
     if let Some(tail) = segments.get(1) {
         let segments2: Vec<_> = tail.split("/").collect();
         let owner = segments2.first();
         let repo = segments2.get(1);
         if let (Some(repo), Some(owner)) = (repo, owner) {
-            let request_url = format!("https://api.github.com/repos/{owner}/{repo}");
+            let request_url = format!("{api_url}/{owner}/{repo}");
 
             // If a branch name was specified we search there and nowhere else
             let branch_name = if let Some(branch_name) = branch_name {
@@ -120,17 +179,10 @@ pub async fn github_search_files(
                 }
             };
 
-            let request_url_base = format!(
-                "https://raw.githubusercontent.com/\
-                    {owner}/\
-                    {repo}/\
-                    refs/heads/\
-                    {branch_name}"
-            );
             for filename in filenames.iter() {
-                let rq = format!("{request_url_base}/{filename}");
+                let rq = content_url_formatter(owner, repo, &branch_name, filename);
                 #[cfg(feature = "log")]
-                log::trace!("Requesting github information for file \"{rq}\"");
+                log::trace!("Requesting {} information for file \"{rq}\"", host.as_str());
                 let file_content = client.get(&rq).send();
                 #[cfg(feature = "log")]
                 log::trace!("Converting response to BibLaTeX");
@@ -140,6 +192,7 @@ pub async fn github_search_files(
                     repository.to_string(),
                     filename.to_string(),
                     search_doi,
+                    host,
                 )
                 .await?;
                 results.extend(r);
