@@ -4,7 +4,7 @@ from crate2bib import get_biblatex
 
 async def obtain_result():
     results = await get_biblatex(
-        "serde", "1.0.219", "crate2bib-py-testing-serde-user-agent"
+        "serde", "1.0.228", "crate2bib-py-testing-serde-user-agent"
     )
     biblatex = results[0]
     expected = "\
@@ -12,8 +12,8 @@ async def obtain_result():
     author = {David Tolnay},\n\
     title = {{serde}: A generic serialization/deserialization framework},\n\
     url = {https://github.com/serde-rs/serde},\n\
-    date = {2025-03-09},\n\
-    version = {1.0.219},\n\
+    date = {2025-09-27},\n\
+    version = {1.0.228},\n\
     license = {MIT OR Apache-2.0},\n\
 }"
     assert biblatex == expected
