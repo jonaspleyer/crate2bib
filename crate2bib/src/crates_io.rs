@@ -317,7 +317,7 @@ mod tests {
     async fn access_crates_io() -> crate::Result<()> {
         let bib_entry = get_biblatex(
             "serde",
-            Some("1.0.219"),
+            Some("1.0.228"),
             Some("crate2bib-testing"),
             None,
             vec![],
@@ -329,8 +329,8 @@ mod tests {
     author = {David Tolnay},
     title = {{serde}: A generic serialization/deserialization framework},
     url = {https://github.com/serde-rs/serde},
-    date = {2025-03-09},
-    version = {1.0.219},
+    date = {2025-09-27},
+    version = {1.0.228},
     license = {MIT OR Apache-2.0},
 }";
         assert_eq!(format!("{}", bib_entry), expected);
