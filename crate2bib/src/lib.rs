@@ -57,4 +57,27 @@ mod test {
             }
         }
     }
+
+    #[tokio::test]
+    async fn codeberg() {
+        let results = get_biblatex(
+            "faer",
+            None,
+            Some("other-agent-234978"),
+            None, // Some("master"),
+            vec!["CITATION.cff"],
+        )
+        .await
+        .unwrap();
+        let bib_entry = &results[0];
+        match bib_entry {
+            BibLaTeX::CratesIO(_) => (),
+            _ => panic!("Got wrong entry type 1"),
+        }
+        let bib_entry = &results[1];
+        match bib_entry {
+            BibLaTeX::CITATIONCFF(_) => (),
+            _ => panic!("Got wrong entry type 2"),
+        }
+    }
 }
