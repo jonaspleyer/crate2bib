@@ -9,7 +9,7 @@ use clap::Parser;
     author,
 )]
 struct Args {
-    /// The exact name of the crate. Note that underscores are synonymous as dashes in the API of
+    /// The exact name of the crate. Note that underscores are synonymous to dashes in the API of
     /// crates.io.
     crate_name: String,
     /// A semver compliant version number (eg. "1", 0.1", "0.3.38").
