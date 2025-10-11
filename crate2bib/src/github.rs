@@ -24,7 +24,7 @@ async fn response_to_biblatex(
     filename: String,
     search_doi: bool,
     host: Host,
-) -> crate::Result<Vec<crate::BibLaTeX>> {
+) -> crate::Result<Vec<crate::Result<crate::BibLaTeX>>> {
     let text = match host {
         Host::Github => {
             let text = response.await?.text().await?;
@@ -56,28 +56,33 @@ async fn response_to_biblatex(
     log::trace!("Checking file extensions in repository");
     let mut results = vec![];
     match extension {
-        Some(&"bib") => results.push(BibLaTeX::Plain(PlainBibLaTeX {
-            bibliography: biblatex::Bibliography::parse(&text)
-                .map_err(crate::Err::BibLaTeXParsing)?,
-            repository,
-            filename,
-        })),
+        Some(&"bib") => results.push(
+            biblatex::Bibliography::parse(&text)
+                // .map_err(crate::Err::BibLaTeXParsing)
+                .map(|x| {
+                    BibLaTeX::Plain(PlainBibLaTeX {
+                        bibliography: x,
+                        repository,
+                        filename,
+                    })
+                })
+                .map_err(crate::Err::from),
+        ),
         Some(&"cff") => {
             // Try to obtain plain BibLaTeX entry from doi
-            let citation_cff = citeworks_cff::from_str(&text)?;
+            let citation_cff = citeworks_cff::from_str(&text);
             if search_doi {
                 if let Some(doi) = citation_cff
-                    .preferred_citation
                     .as_ref()
-                    .and_then(|p| p.doi.as_ref())
+                    .ok()
+                    .and_then(|x| x.preferred_citation.as_ref().and_then(|p| p.doi.as_ref()))
                 {
                     match crate::get_bibtex_doi(doi, client).await {
-                        Ok(Some(bib)) => results.push(crate::BibLaTeX::Plain(PlainBibLaTeX {
+                        Ok(bib) => results.push(Ok(crate::BibLaTeX::Plain(PlainBibLaTeX {
                             bibliography: bib,
                             repository,
                             filename,
-                        })),
-                        Ok(None) => (),
+                        }))),
                         Err(e) => {
                             #[cfg(feature = "log")]
                             log::warn!("Received error: \"{e}\" during doi.org request.");
@@ -86,7 +91,11 @@ async fn response_to_biblatex(
                 }
             }
 
-            results.push(BibLaTeX::CITATIONCFF(citation_cff))
+            results.push(
+                citation_cff
+                    .map(BibLaTeX::CITATIONCFF)
+                    .map_err(crate::Err::from),
+            )
         }
         None => (),
         Some(x) => {
@@ -106,7 +115,7 @@ pub async fn github_search_files(
     filenames: Vec<&str>,
     branch_name: Option<&str>,
     search_doi: bool,
-) -> crate::Result<Vec<crate::BibLaTeX>> {
+) -> crate::Result<Vec<crate::Result<crate::BibLaTeX>>> {
     // Check if this is Github
     let (host, api_url) = if repository.contains("github.com/") {
         (Host::Github, "https://api.github.com/repos")

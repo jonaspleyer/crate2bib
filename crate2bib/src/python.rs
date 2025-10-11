@@ -44,7 +44,7 @@ fn get_biblatex_py(
         .await?;
         Ok(results
             .into_iter()
-            .map(|x| format!("{x}"))
+            .filter_map(|x| x.ok().map(|x| format!("{x}")))
             .collect::<Vec<_>>())
     })
 }

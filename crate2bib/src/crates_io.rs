@@ -275,7 +275,7 @@ pub async fn get_biblatex(
     user_agent: Option<&str>,
     branch_name: Option<&str>,
     filenames: Vec<&str>,
-) -> crate::Result<Vec<crate::BibLaTeX>> {
+) -> crate::Result<Vec<crate::Result<crate::BibLaTeX>>> {
     use crates_io_api::AsyncClient;
     use reqwest::header::*;
     #[cfg(feature = "log")]
@@ -295,7 +295,7 @@ pub async fn get_biblatex(
 
     #[cfg(feature = "log")]
     log::trace!("Obtain entry from crates.io");
-    let mut results = vec![crate::BibLaTeX::CratesIO(r1)];
+    let mut results = vec![Ok(crate::BibLaTeX::CratesIO(r1))];
     #[cfg(feature = "log")]
     log::trace!("Obtain other entries");
     if let Some(u) = url {
@@ -304,7 +304,7 @@ pub async fn get_biblatex(
     }
     #[cfg(feature = "log")]
     log::trace!("Sort obtained entries by priority");
-    results.sort_by_key(|x| u8::MAX - x.priority());
+    results.sort_by_key(|x| u8::MAX - x.as_ref().map(|x| x.priority()).unwrap_or_default());
 
     Ok(results)
 }

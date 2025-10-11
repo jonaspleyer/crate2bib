@@ -2,7 +2,7 @@
 pub async fn get_bibtex_doi(
     doi: &str,
     client: reqwest::Client,
-) -> crate::Result<Option<biblatex::Bibliography>> {
+) -> crate::Result<biblatex::Bibliography> {
     // let doi = "10.1021/acs.jpcc.0c05161";
     let rq = format!("https://doi.org/{doi}");
 
@@ -16,9 +16,6 @@ pub async fn get_bibtex_doi(
 
     #[cfg(feature = "log")]
     log::trace!("Parsing request to biblatex");
-    if let Ok(bib) = res.text().await {
-        Ok(Some(biblatex::Bibliography::parse(&bib)?))
-    } else {
-        Ok(None)
-    }
+    let bib = res.text().await?;
+    Ok(biblatex::Bibliography::parse(&bib)?)
 }
