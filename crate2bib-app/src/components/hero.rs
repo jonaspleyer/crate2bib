@@ -33,9 +33,57 @@ pub fn Note(props: Props) -> Element {
     }
 }
 
+fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &String) -> Element {
+    let (name, link, found_message) = match entry {
+        crate2bib::BibLaTeX::CratesIO(ref e) => (
+            "crates.io".to_string(),
+            format!("https://crates.io/crates/{crate_name}"),
+            // e.version.as_ref().map(|x| format!("{x}")),
+            if let Some(v) = &e.version {
+                format!("{crate_name} {}", v)
+            } else {
+                crate_name.clone()
+            },
+        ),
+        crate2bib::BibLaTeX::CITATIONCFF(ref e) => (
+            "CITATION.cff".to_string(),
+            e.url.clone().map_or("".to_string(), |x| format!("{x}")),
+            // e.version.clone(),
+            if let Some(v) = &e.version {
+                format!("{crate_name} {}", v)
+            } else {
+                crate_name.clone()
+            },
+        ),
+        #[allow(unused)]
+        crate2bib::BibLaTeX::Plain(crate2bib::PlainBibLaTeX {
+            ref bibliography,
+            ref repository,
+            ref filename,
+        }) => (
+            "bibliography file".to_string(),
+            repository.clone(),
+            // None,
+            crate_name.clone(),
+        ),
+    };
+    let height = format!("{entry}").lines().count() + 5;
+    Success(Props {
+        message: rsx! {
+            p {
+                "Found entry for "
+                code { "{found_message})" }
+                " from "
+                a { href: link, {name} }
+            }
+            textarea { class: "response", height: "{height}em", "{entry}" }
+        },
+    })
+}
+
 #[component]
 pub fn Hero() -> Element {
-    let mut messages = use_signal(|| circ_buffer::RingBuffer::<_, 8>::new());
+    let mut messages = use_signal(circ_buffer::RingBuffer::<_, 8>::new);
 
     let update_form = move |event: Event<FormData>| async move {
         let values: std::collections::HashMap<_, _> = event
@@ -66,51 +114,12 @@ pub fn Hero() -> Element {
             // TODO rework this; how can we display multiple results?
             Ok(results) => {
                 for entry in results.into_iter().rev() {
-                    let (name, link, found_message) = match entry {
-                        crate2bib::BibLaTeX::CratesIO(ref e) => (
-                            "crates.io".to_string(),
-                            format!("https://crates.io/crates/{crate_name}"),
-                            // e.version.as_ref().map(|x| format!("{x}")),
-                            if let Some(v) = &e.version {
-                                format!("{crate_name} {}", v)
-                            } else {
-                                crate_name.clone()
-                            },
-                        ),
-                        crate2bib::BibLaTeX::CITATIONCFF(ref e) => (
-                            "CITATION.cff".to_string(),
-                            e.url.clone().map_or("".to_string(), |x| format!("{x}")),
-                            // e.version.clone(),
-                            if let Some(v) = &e.version {
-                                format!("{crate_name} {}", v)
-                            } else {
-                                crate_name.clone()
-                            },
-                        ),
-                        #[allow(unused)]
-                        crate2bib::BibLaTeX::Plain(crate2bib::PlainBibLaTeX {
-                            ref bibliography,
-                            ref repository,
-                            ref filename,
-                        }) => (
-                            "bibliography file".to_string(),
-                            repository.clone(),
-                            // None,
-                            crate_name.clone(),
-                        ),
-                    };
-                    let height = format!("{entry}").lines().count() + 5;
-                    messages.write().push(Success(Props {
-                        message: rsx! {
-                            p {
-                                "Found entry for "
-                                code { "{found_message})" }
-                                " from "
-                                a { href: link, {name} }
-                            }
-                            textarea { class: "response", height: "{height}em", "{entry}" }
-                        },
-                    }));
+                    match entry {
+                        Ok(entry) => messages.write().push(convert_entry(entry, crate_name)),
+                        Err(e) => messages.write().push(Error(Props {
+                            message: rsx! { "ERROR: {e}" },
+                        })),
+                    }
                 }
             }
             Err(e) => {
@@ -125,7 +134,7 @@ pub fn Hero() -> Element {
         div { id: "hero", class: "middle",
             h1 { "crate2Bib" }
             h3 { "Create a BibLaTeX entry from a given crate and version number." }
-            form { onsubmit: move |event| update_form(event),
+            form { onsubmit: update_form,
                 input {
                     name: "crate_name",
                     r#type: "text",
