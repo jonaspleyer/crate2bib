@@ -34,6 +34,31 @@ struct Args {
     branch_name: String,
 }
 
+fn format_result(bib: crate2bib::BibLaTeX) {
+    match bib {
+        crate2bib::BibLaTeX::CITATIONCFF(ref b) => {
+            println!(
+                "Generated from CITATION.cff file in repository {}",
+                b.repository
+                    .as_ref()
+                    .map_or("".to_string(), |x| format!("{x}"))
+            )
+        }
+        crate2bib::BibLaTeX::CratesIO(_) => {
+            println!("Generated enty from crates.io information")
+        }
+        #[allow(unused)]
+        crate2bib::BibLaTeX::Plain(crate2bib::PlainBibLaTeX {
+            ref bibliography,
+            ref repository,
+            ref filename,
+        }) => {
+            println!("Obtained bibliography {filename} file directly from repository {repository}")
+        }
+    }
+    println!("{bib}");
+}
+
 #[async_std::main]
 async fn main() -> crate2bib::Result<()> {
     env_logger::init();
@@ -63,29 +88,9 @@ async fn main() -> crate2bib::Result<()> {
 
     for result in results {
         match result {
-            crate2bib::BibLaTeX::CITATIONCFF(ref b) => {
-                println!(
-                    "Generated from CITATION.cff file in repository {}",
-                    b.repository
-                        .as_ref()
-                        .map_or("".to_string(), |x| format!("{x}"))
-                )
-            }
-            crate2bib::BibLaTeX::CratesIO(_) => {
-                println!("Generated enty from crates.io information")
-            }
-            #[allow(unused)]
-            crate2bib::BibLaTeX::Plain(crate2bib::PlainBibLaTeX {
-                ref bibliography,
-                ref repository,
-                ref filename,
-            }) => {
-                println!(
-                    "Obtained bibliography {filename} file directly from repository {repository}"
-                )
-            }
+            Ok(bib) => format_result(bib),
+            Err(e) => log::error!("{e}"),
         }
-        println!("{result}");
     }
     Ok(())
 }
