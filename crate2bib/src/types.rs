@@ -64,7 +64,7 @@ pub enum Err {
     CiteworksCff(#[from] serde_yaml::Error),
     /// Wraps [biblatex::ParseError]
     #[error("error during parsing of BibLaTeX file")]
-    BibLaTeXParsing(biblatex::ParseError),
+    BibLaTeXParsing(#[from] biblatex::ParseError),
     /// Wraps [base64::DecodeError]
     #[error("error during decoding")]
     Base64DecodeError(#[from] base64::DecodeError),
@@ -74,12 +74,6 @@ pub enum Err {
 impl From<Err> for PyErr {
     fn from(value: Err) -> Self {
         pyo3::exceptions::PyValueError::new_err(format!("{value}"))
-    }
-}
-
-impl From<biblatex::ParseError> for Err {
-    fn from(value: biblatex::ParseError) -> Self {
-        Err::BibLaTeXParsing(value)
     }
 }
 
