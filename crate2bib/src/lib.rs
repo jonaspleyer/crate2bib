@@ -51,7 +51,8 @@ mod test {
         .await
         .unwrap();
 
-        for r in results.iter() {
+        for r in results {
+            let r = r.unwrap();
             if let BibLaTeX::Plain(_) = r {
                 assert_eq!(expected, format!("{r}"));
             }
@@ -71,12 +72,12 @@ mod test {
         .unwrap();
         let bib_entry = &results[0];
         match bib_entry {
-            BibLaTeX::CratesIO(_) => (),
+            Ok(BibLaTeX::CratesIO(_)) => (),
             _ => panic!("Got wrong entry type 1"),
         }
         let bib_entry = &results[1];
         match bib_entry {
-            BibLaTeX::CITATIONCFF(_) => (),
+            Ok(BibLaTeX::CITATIONCFF(_)) => (),
             _ => panic!("Got wrong entry type 2"),
         }
     }

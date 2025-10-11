@@ -322,8 +322,8 @@ mod tests {
             None,
             vec![],
         )
-        .await?[0]
-            .clone();
+        .await?;
+
         let expected = "\
 @software {Tolnay2025,
     author = {David Tolnay},
@@ -333,10 +333,13 @@ mod tests {
     version = {1.0.228},
     license = {MIT OR Apache-2.0},
 }";
-        assert_eq!(format!("{}", bib_entry), expected);
-        if let BibLaTeX::CratesIO(_) = bib_entry {
-        } else {
-            panic!("got wrong return type");
+        for b in bib_entry {
+            let bib_entry = b?;
+            assert_eq!(format!("{}", bib_entry), expected);
+            if let BibLaTeX::CratesIO(_) = bib_entry {
+            } else {
+                panic!("got wrong return type");
+            }
         }
         Ok(())
     }
@@ -353,17 +356,17 @@ mod tests {
         .await?;
         let bib_entry = &results[0];
         match bib_entry {
-            BibLaTeX::Plain(_) => (),
+            Ok(BibLaTeX::Plain(_)) => (),
             _ => panic!("Got wrong entry type 1"),
         }
         let bib_entry = &results[1];
         match bib_entry {
-            BibLaTeX::CratesIO(_) => (),
+            Ok(BibLaTeX::CratesIO(_)) => (),
             _ => panic!("Got wrong return type 2"),
         }
         let bib_entry = &results[2];
         match bib_entry {
-            BibLaTeX::CITATIONCFF(_) => (),
+            Ok(BibLaTeX::CITATIONCFF(_)) => (),
             _ => panic!("Got wrong return type 3"),
         }
         Ok(())
