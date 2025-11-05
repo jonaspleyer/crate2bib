@@ -90,13 +90,10 @@ pub fn Hero() -> Element {
             .data
             .values()
             .iter()
-            .map(|(k, v)| match v {
-                FormValue::Text(t) => (k.clone(), t.clone()),
-                FormValue::File(f) => todo!(),
-            }) // (k.clone(), v.0.clone()))
+            .map(|(k, v)| (k.clone(), v.0.clone()))
             .collect();
-        let crate_name = &values.get("crate_name").unwrap();
-        let version: Option<&String> = values.get("version");
+        let crate_name = &values.get("crate_name").unwrap()[0];
+        let version: Option<&String> = values.get("version").and_then(|x| x.first());
         let mut y = String::new();
         match crate2bib::get_biblatex(
             crate_name,
