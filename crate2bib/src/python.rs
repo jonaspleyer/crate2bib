@@ -10,6 +10,7 @@ use pyo3::prelude::*;
 ///     user_agent (:obj:`str`, optional):: The name of the user agent. Defaults to None.
 /// Returns:
 ///     tuple: The formatted BibLaTeX entry and its origin given by [crate2bib::EntryOrigin]
+#[pyo3_stub_gen::derive::gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(
     name = "get_biblatex",
