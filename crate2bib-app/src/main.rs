@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use components::{Main};
+use components::{Footer, Main};
 
 mod components;
 
@@ -37,5 +37,6 @@ fn App() -> Element {
         document::Link { rel: "stylesheet", href: ADMONITION_CSS }
 
         Router::<Route> {}
+        Footer {}
     }
 }
