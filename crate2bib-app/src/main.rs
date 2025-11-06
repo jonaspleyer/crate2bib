@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use components::Hero;
+use components::{Main};
 
 mod components;
 
@@ -25,7 +25,7 @@ fn main() {
 #[derive(Routable, Clone)]
 enum Route {
     #[route("/")]
-    Hero {},
+    Main {},
 }
 
 #[component]

@@ -82,7 +82,7 @@ fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &String) -> Element {
 }
 
 #[component]
-pub fn Hero() -> Element {
+pub fn Main() -> Element {
     let mut messages = use_signal(circ_buffer::RingBuffer::<_, 8>::new);
 
     let update_form = move |event: Event<FormData>| async move {

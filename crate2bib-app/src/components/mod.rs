@@ -1,3 +1,3 @@
-mod hero;
+mod main;
 
-pub use hero::Hero;
+pub use main::Main;
