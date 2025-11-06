@@ -24,7 +24,7 @@ The webapp provides a simple interface to generate entries for particular crates
 provided version numbers.
 If multiple candidates for bibliography entries are available, they are all displayed.
 
-![](https://github.com/jonaspleyer/crate2bib/blob/main/media/screenshot.png)
+![](https://github.com/jonaspleyer/crate2bib/blob/main/media/webapp-screenshot.png)
 
 ## Python Example
 The python bindings consist of only a single function `get_biblatex` which obtains the entry of the
