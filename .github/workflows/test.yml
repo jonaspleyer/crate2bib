@@ -26,3 +26,8 @@ jobs:
 
       - name: Test
         run: cargo test --workspace
+
+      - name: Stubfile matches
+        run: |
+          cargo run --bin stub_gen --features pyo3
+          git diff --exit-code
