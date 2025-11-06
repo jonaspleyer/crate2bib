@@ -83,4 +83,5 @@ mod test {
     }
 }
 
+#[cfg(feature = "pyo3")]
 pyo3_stub_gen::define_stub_info_gatherer!(stub_info);
