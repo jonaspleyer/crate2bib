@@ -6,25 +6,26 @@ all:
 	$(CC) $(OPTIONS) $(TARGET)
 
 clean_partial:
-	rm -f *.aux
-	rm -f *.bbl
-	rm -f *.blg
-	rm -f *.dvi
-	rm -f *.fdb_latexmk
-	rm -f *.fls
-	rm -f *.glo
-	rm -f *.hd
-	rm -f *.idx
-	rm -f *.ins
-	rm -f *.log
-	rm -f *.out
-	rm -f *main.toc
+	rm -f $(TARGET).aux
+	rm -f $(TARGET).bcf-SAVE-ERROR
+	rm -f $(TARGET).bbl
+	rm -f $(TARGET).blg
+	rm -f $(TARGET).dvi
+	rm -f $(TARGET).fdb_latexmk
+	rm -f $(TARGET).fls
+	rm -f $(TARGET).glo
+	rm -f $(TARGET).hd
+	rm -f $(TARGET).idx
+	rm -f $(TARGET).ins
+	rm -f $(TARGET).log
+	rm -f $(TARGET).out
+	rm -f $(TARGET).toc
+	rm -f $(TARGET).run.xml
+	rm -f $(TARGET).bcf
 	rm -f archive.zip
-	rm -f *.xml
-	rm -f *.bcf
 
 clean: clean_partial
-	rm -f *.pdf
+	rm -f $(TARGET).pdf
 
 fresh: clean all
 
