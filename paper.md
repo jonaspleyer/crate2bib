@@ -1,5 +1,5 @@
 ---
-title: 'crate2bib: '
+title: 'crate2bib: Citing Rust crates made easy'
 tags:
   - Rust
   - BibLaTeX
