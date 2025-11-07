@@ -1,76 +1,38 @@
 \documentclass[11pt,a4paper]{article}
 
-% \usepackage[top=0.85in,left=2.75in,footskip=0.75in,marginparwidth=2in]{geometry}
-\usepackage[top=1in,left=1in,right=1in,bottom=1in]{geometry}
-\usepackage[utf8]{inputenc}
-% \usepackage{cite}
-\usepackage{float}
-\usepackage{booktabs}
-\usepackage{nameref,hyperref}
-% \usepackage{microtype}
 \usepackage[english]{babel}
 \usepackage[backend=biber,style=ieee]{biblatex}
-% \DisableLigatures[f]{encoding = *, family = * }
-
+\usepackage{booktabs}
+\usepackage{epstopdf}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage[top=1in,left=1in,right=1in,bottom=1in]{geometry}
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{lastpage}
 \usepackage{lmodern}
+\usepackage{nameref}
+
+\renewcommand{\familydefault}{\sfdefault}
 
 \addbibresource{references.bib}
 
-% text layout - change as needed
 \raggedright
-\setlength{\parindent}{0.5cm}
-% \textwidth 5.25in 
-% \textheight 8.75in
 
-% Remove % for double line spacing
-%\usepackage{setspace} 
-%\doublespacing
+\setlength{\parindent}{0cm}
+\setlength{\parsep}{0em}
+\setlength{\parskip}{5pt}
+\setlength{\itemsep}{0em}
 
-% use adjustwidth environment to exceed text width (see examples in text)
-% \usepackage{changepage}
-
-% adjust caption style
-% \usepackage[aboveskip=1pt,labelfont=bf,labelsep=period,singlelinecheck=off]{caption}
-
-% remove brackets from references
-% \makeatletter
-% \renewcommand{\@biblabel}[1]{\quad#1.}
-% \makeatother
-
-% headrule, footrule and page numbers
-\usepackage{lastpage,fancyhdr,graphicx}
-\usepackage{epstopdf}
 \pagestyle{myheadings}
 \pagestyle{fancy}
 \fancyhf{}
 \rfoot{\thepage/\pageref{LastPage}}
 \renewcommand{\footrule}{\hrule height 2pt \vspace{2mm}}
-% \fancyheadoffset[L]{2.25in}
-% \fancyfootoffset[L]{2.25in}
 
-% use \textcolor{color}{text} for colored text (e.g. highlight to-do areas)
-\usepackage{color}
-
-% define custom colors (this one is for figure captions)
-\definecolor{Gray}{gray}{.25}
-
-% this is required to include graphics
-\usepackage{graphicx}
-
-% use if you want to put caption to the side of the figure - see example in text
-% \usepackage{sidecap}
-
-% use for have text wrap around figures
-% \usepackage{wrapfig}
-% \usepackage[pscoord]{eso-pic}
-% \usepackage[fulladjust]{marginnote}
-% \reversemarginpar
-
-% document begins here
 \begin{document}
-% \vspace*{0.35in}
 
-% title goes here:
 \begin{flushleft}
 {\Large
 \textbf\newline{\texttt{crate2bib}: Citing Rust crates made easy}
@@ -78,7 +40,8 @@
 \newline
 % authors go here:
 \\
-Jonas Pleyer\textsuperscript{1}\\
+\href{https://orcid.org/0009-0001-0613-7978}{\includegraphics[width=1em]{orcid.pdf}}%
+\hspace{1mm}Jonas Pleyer\textsuperscript{1}\\
 \bigskip
 \bf{1} Freiburg Center for Data Analysis and Modelling and AI (FDMAI), University of Freiburg, Freiburg, Germany\\
 \bigskip
