@@ -7,16 +7,18 @@ use pyo3::prelude::*;
 /// Args:
 ///     crate_name(str): Name of the crate to get BibLaTeX entry
 ///     version (str): A semver-compliant version number for the crate
-///     user_agent (:obj:`str`, optional):: The name of the user agent. Defaults to None.
+///     user_agent (:obj:`str`, optional): The name of the user agent. Defaults to None.
+///     branch_name(:obj:`str`, optional): Name of the branch where to look for citaiton files.
+///     filenames(:obj:`list[str]`, optional): Filenames to search for within repository.
 /// Returns:
-///     tuple: The formatted BibLaTeX entry and its origin given by [crate2bib::EntryOrigin]
+///     list: A list of formatted BibLaTeX entries.
 #[pyo3_stub_gen::derive::gen_stub_pyfunction]
 #[pyfunction]
 #[pyo3(
     name = "get_biblatex",
     signature = (
         crate_name,
-        semver = None,
+        version = None,
         user_agent = None,
         branch_name = None,
         filenames = vec![
@@ -28,7 +30,7 @@ use pyo3::prelude::*;
 fn get_biblatex_py(
     py: Python,
     crate_name: String,
-    semver: Option<String>,
+    version: Option<String>,
     user_agent: Option<String>,
     branch_name: Option<String>,
     filenames: Vec<String>,
@@ -37,7 +39,7 @@ fn get_biblatex_py(
         let filenames = filenames.iter().map(|x| x.as_str()).collect();
         let results = get_biblatex(
             &crate_name,
-            semver.as_deref(),
+            version.as_deref(),
             user_agent.as_deref(),
             branch_name.as_deref(),
             filenames,

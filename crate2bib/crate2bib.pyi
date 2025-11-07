@@ -4,15 +4,17 @@
 import builtins
 import typing
 
-def get_biblatex(crate_name: builtins.str, semver: typing.Optional[builtins.str] = None, user_agent: typing.Optional[builtins.str] = None, branch_name: typing.Optional[builtins.str] = None, filenames: typing.Sequence[builtins.str] = ['CITATION.cff', 'citation.bib']) -> typing.Any:
+def get_biblatex(crate_name: builtins.str, version: typing.Optional[builtins.str] = None, user_agent: typing.Optional[builtins.str] = None, branch_name: typing.Optional[builtins.str] = None, filenames: typing.Sequence[builtins.str] = ['CITATION.cff', 'citation.bib']) -> typing.Any:
     r"""
     Wraps the [crate2bib::get_biblatex] function.
     
     Args:
         crate_name(str): Name of the crate to get BibLaTeX entry
         version (str): A semver-compliant version number for the crate
-        user_agent (:obj:`str`, optional):: The name of the user agent. Defaults to None.
+        user_agent (:obj:`str`, optional): The name of the user agent. Defaults to None.
+        branch_name(:obj:`str`, optional): Name of the branch where to look for citaiton files.
+        filenames(:obj:`list[str]`, optional): Filenames to search for within repository.
     Returns:
-        tuple: The formatted BibLaTeX entry and its origin given by [crate2bib::EntryOrigin]
+        list: A list of formatted BibLaTeX entries.
     """
 
