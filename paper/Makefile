@@ -20,6 +20,8 @@ clean_partial:
 	rm -f *.out
 	rm -f *main.toc
 	rm -f archive.zip
+	rm -f *.xml
+	rm -f *.bcf
 
 clean: clean_partial
 	rm -f *.pdf
