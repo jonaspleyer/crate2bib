@@ -16,7 +16,7 @@ There are 4 distinct ways of using this package:
 
 1. Webapp [jonaspleyer/.github.io/crate2bib](https://jonaspleyer.github.io/crate2bib/)
 2. Python bindings [pypi.org/project/crate2bib](https://pypi.org/project/crate2bib/)
-3. CLI tool [crate2bib-cli](https://github.com/jonaspleyer/tree/main/crate2bib)
+3. CLI tool [crate2bib-cli](https://github.com/jonaspleyer/crate2bib/tree/main/crate2bib-cli)
 4. Rust crate [crate2bib](https://crates.io/crate2bib)
 
 ## Webapp
