@@ -31,9 +31,4 @@ fresh: clean all
 
 zip: fresh
 	$(MAKE) clean_partial
-	zip archive.zip *.sty
-	zip archive.zip *.dtx
-	zip archive.zip *.tex
-	zip archive.zip *.pdf
-	zip archive.zip -r figures/
-	zip archive.zip -r docs/
+	zip archive.zip *
