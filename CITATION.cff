@@ -38,4 +38,4 @@ abstract: >-
   tool can be used as a webapp, python
 
   package, command-line utility or Rust crate.
-license: Apache-2.0 & MIT
+license: Apache-2.0
