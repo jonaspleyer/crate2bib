@@ -2,7 +2,7 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-title: crate2bib: Citing Rust crates made easy
+title: 'crate2bib: Citing Rust crates made easy'
 message: Citing Rust crates made easy
 type: software
 authors:
