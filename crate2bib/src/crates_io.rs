@@ -193,7 +193,7 @@ impl std::fmt::Display for BibLaTeXCratesIO {
             writeln!(f, "    license = {{{license}}},")?;
         }
         if let Some(abstract_text) = &self.abstract_text {
-            if abstract_text.len() > 80 {
+            if abstract_text.len() <= 80 - 18 {
                 writeln!(
                     f,
                     "    abstract = {{\n{}\n    }}",
@@ -203,7 +203,24 @@ impl std::fmt::Display for BibLaTeXCratesIO {
                         .collect::<String>()
                 )?;
             } else {
-                writeln!(f, "    abstract = {{{abstract_text}}}")?;
+                writeln!(f, "    abstract = {{")?;
+                // Split into words
+                let mut output = String::with_capacity(100);
+                for word in abstract_text.split(" ") {
+                    if word.len() > 80 - 8 {
+                        writeln!(f, "        {output}")?;
+                        writeln!(f, "        {word}")?;
+                        output.clear();
+                    } else if output.len() + word.len() > 80 - 8 {
+                        writeln!(f, "        {output}")?;
+                        output = word.to_string();
+                    } else if output.is_empty() {
+                        output = word.to_string();
+                    } else {
+                        output = format!("{output} {word}");
+                    }
+                }
+                writeln!(f, "    }}")?;
             }
         }
         // Closes the entry
