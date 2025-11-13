@@ -83,3 +83,17 @@ The rust crate behind the previously listed approaches is directly available at
 [crates.io/crate2bib](https://crate.io/crate2bib).
 It provides more functionality compared to the previous approaches and separates various sources for
 possible BibLaTeX entries such as Github and crates.io.
+
+## Citing
+
+```bibtex
+@software{Pleyer2025crate2bib,
+      title={crate2bib: Citing Rust crates made easy},
+      author={Jonas Pleyer},
+      year={2025},
+      eprint={2511.07468},
+      archivePrefix={arXiv},
+      primaryClass={cs.DL},
+      url={https://arxiv.org/abs/2511.07468},
+}
+```
