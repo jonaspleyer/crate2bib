@@ -2,7 +2,7 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-title: crate2bib
+title: crate2bib: Citing Rust crates made easy
 message: Citing Rust crates made easy
 type: software
 authors:
@@ -18,24 +18,16 @@ identifiers:
     value: 10.48550/arXiv.2511.07468
 repository-code: 'https://github.com/jonaspleyer/crate2bib/'
 url: 'https://jonaspleyer.github.io/crate2bib/'
-abstract: >-
+abstract: >
   crate2bib is a collection of tools designed to convert
-  Rust crates hosted on crates.io into
-
-  bibliography entries. It queries the server, extracts
-  metadata from the given crate and also searches
-
-  for possible CITATION.cff files within the repository that
-  hosts the code of the crate in interest.
-
-  From this information, it formats the provided information
-  such as name, version, authors and
-
-  generates entries for all available candidates. With this
-  approach, crates can be cited easily and
-
-  existing citations for published crates can be found. The
-  tool can be used as a webapp, python
-
-  package, command-line utility or Rust crate.
+  Rust crates hosted on crates.io into bibliography entries.
+  It queries the server, extracts metadata from the given
+  crate and also searches for possible CITATION.cff files
+  within the repository that hosts the code of the crate in
+  interest. From this information, it formats the provided
+  information such as name, version, authors and  generates
+  entries for all available candidates. With this approach,
+  crates can be cited easily and existing citations for
+  published crates can be found. The tool can be used as a
+  webapp, python package, command-line utility or Rust crate.
 license: Apache-2.0
