@@ -25,6 +25,8 @@ pub struct BibLaTeXCratesIO {
     pub version: Option<semver::Version>,
     /// The time at which this version was published
     pub date: Option<chrono::DateTime<chrono::Utc>>,
+    /// Abstract text if provided
+    pub abstract_text: Option<String>,
 }
 
 impl BibLaTeXCratesIO {
@@ -132,10 +134,7 @@ impl BibLaTeXCratesIO {
             }
             .to_string(),
             author, // authors.into_iter().map(|a| format!("{a}")),
-            title: format!(
-                "{{{title}}}{}",
-                abstract_text.map_or_else(|| "".to_string(), |x| format!(": {x}"))
-            ),
+            title: format!("{{{title}}}"),
             url: repository
                 .map(|url| format!("{url}"))
                 .or(repository_code.map(|url| format!("{url}")))
@@ -160,6 +159,7 @@ impl BibLaTeXCratesIO {
                 }
                 None => None,
             },
+            abstract_text,
             version,
             date,
         })
@@ -191,6 +191,20 @@ impl std::fmt::Display for BibLaTeXCratesIO {
         }
         if let Some(license) = &self.license {
             writeln!(f, "    license = {{{license}}},")?;
+        }
+        if let Some(abstract_text) = &self.abstract_text {
+            if abstract_text.len() > 80 {
+                writeln!(
+                    f,
+                    "    abstract = {{\n{}\n    }}",
+                    abstract_text
+                        .split("\n")
+                        .map(|x| format!("        {x}\n"))
+                        .collect::<String>()
+                )?;
+            } else {
+                writeln!(f, "    abstract = {{{abstract_text}}}")?;
+            }
         }
         // Closes the entry
         write!(f, "}}")?;
@@ -265,6 +279,7 @@ pub async fn generate_biblatex_crates_io(
         license: found_version.license,
         version: Some(found_version_semver),
         date: Some(found_version.updated_at),
+        abstract_text: None,
     })
 }
 
