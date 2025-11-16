@@ -4,6 +4,7 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jonaspleyer/crate2bib/maturin.yml?style=flat-square&label=Release)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jonaspleyer/crate2bib/pytest.yml?style=flat-square&label=Pytest)
 [![PyPI - Version](https://img.shields.io/pypi/v/crate2bib?style=flat-square)](https://pypi.org/project/crate2bib/)
+[![Static Badge](https://img.shields.io/badge/build-10.48550%2FarXiv.2511.07468-blue?style=flat-square&label=Preprint)](https://doi.org/10.48550/arXiv.2511.07468)
 
 # crate2bib
 
