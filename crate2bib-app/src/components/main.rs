@@ -90,10 +90,16 @@ pub fn Main() -> Element {
             .data
             .values()
             .iter()
-            .map(|(k, v)| (k.clone(), v.0.clone()))
+            .filter_map(|(k, v)| {
+                if let FormValue::Text(t) = v {
+                    Some((k.clone(), t.clone()))
+                } else {
+                    None
+                }
+            })
             .collect();
-        let crate_name = &values.get("crate_name").unwrap()[0];
-        let version: Option<&String> = values.get("version").and_then(|x| x.first());
+        let crate_name = &values.get("crate_name").unwrap();
+        let version: Option<&String> = values.get("version");
         let mut y = String::new();
         match crate2bib::get_biblatex(
             crate_name,
