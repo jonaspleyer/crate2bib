@@ -4,7 +4,7 @@ from crate2bib import get_biblatex
 
 async def obtain_result():
     results = await get_biblatex(
-        "serde", "1.0.228", "crate2bib-py-testing-serde-user-agent"
+        "serde", "=1.0.228", "crate2bib-py-testing-serde-user-agent"
     )
     biblatex = results[0]
     expected = "\

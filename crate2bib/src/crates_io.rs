@@ -280,7 +280,7 @@ pub async fn generate_biblatex_crates_io(
                     .name
                     .and_then(|x| x.split(" ").nth(1).map(|x| x.to_string())))
                 .unwrap_or(crate_name.to_string()),
-            info.crate_data.updated_at.year()
+            found_version.updated_at.year()
         ),
         work_type: "software".to_string(),
         author: found_version
@@ -362,7 +362,7 @@ mod tests {
     async fn access_crates_io() -> crate::Result<()> {
         let bib_entry = get_biblatex(
             "serde",
-            Some("1.0.228"),
+            Some("=1.0.228"),
             Some("crate2bib-testing"),
             None,
             vec![],
