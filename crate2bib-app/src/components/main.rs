@@ -153,7 +153,6 @@ pub fn Main() -> Element {
         )
         .await
         {
-            // TODO rework this; how can we display multiple results?
             Ok(results) => {
                 for entry in results.into_iter().rev() {
                     match entry {
@@ -175,31 +174,38 @@ pub fn Main() -> Element {
     rsx! {
         div { id: "hero", class: "middle",
             h1 { "crate2Bib" }
-            h3 { "Create a BibLaTeX entry from a given crate and version number." }
+            h3 { "Create a BibLaTeX entry from a given crate or DOI" }
             form { onsubmit: update_form,
                 input {
-                    name: "crate_name",
+                    name: "input_text",
                     r#type: "text",
-                    value: "cellular-raza",
+                    value: "cellular-raza@0.4",
                 }
-                input { name: "version", r#type: "text", value: "0.4" }
-                input { value: "Generate", r#type: "submit" }
+                select { name: "search_type",
+                    option { value: "crate", "crate" }
+                    option { value: "DOI", "DOI" }
+                }
+                input { value: "search", r#type: "submit" }
             }
             h2 { "BibLaTeX Citation" }
-            p {
-                "The "
-                a { href: "https://github.com/jonaspleyer/crate2bib", "crate2bib" }
-                " crate scans "
-                a { href: "https://crates.io/", "crates.io" }
-                " for possible candidates and then searches for any "
-                code { "CITATION.cff" }
-                " files inside the respective repository of the candidate."
-            }
 
             for i in 0..messages.read().len() {
                 div { style: "margin: 0.5em;",
                     {&messages.read()[messages.read().len() - i - 1].clone()}
                 }
+            }
+
+            p {
+                a { href: "https://github.com/jonaspleyer/crate2bib", "crate2bib" }
+                " scans "
+                a { href: "https://crates.io/", "crates.io" }
+                " for possible candidates and then searches for any "
+                code { "CITATION.cff" }
+                " files inside the respective repository of the candidate."
+            }
+            p {
+                "BibTeX entries for DOIs are obtained directly from "
+                a { href: "https://doi.org/", "doi.org" }
             }
         }
     }
