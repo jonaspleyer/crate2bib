@@ -261,7 +261,7 @@ pub async fn generate_biblatex_crates_io(
     } else {
         obtained_versions.first().cloned()
     }
-    .ok_or(crate::NotFoundError(
+    .ok_or(crate::Err::NotFound(
         version.map_or(format!("Could not find crate {crate_name}"), |x| {
             format!("Could not find version {x} for crate {crate_name}")
         }),

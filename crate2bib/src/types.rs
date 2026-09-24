@@ -22,19 +22,6 @@ pub struct PlainBibLaTeX {
     pub filename: String,
 }
 
-/// Envoked if a certain file or entity can not be found which should be there.
-#[derive(Clone, Debug)]
-pub struct NotFoundError(pub(crate) String);
-
-impl std::fmt::Display for NotFoundError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)?;
-        Ok(())
-    }
-}
-
-impl std::error::Error for NotFoundError {}
-
 /// Contains all errors of this [crate]
 #[derive(Error, Debug)]
 pub enum Err {
@@ -54,8 +41,11 @@ pub enum Err {
     #[error("invalid header value")]
     HeaderValue(#[from] reqwest::header::InvalidHeaderValue),
     /// Wraps [NotFoundError]
-    #[error("value not found")]
-    NotFound(#[from] crate::NotFoundError),
+    #[error("{0}")]
+    NotFound(String),
+    /// Server returned error
+    #[error("{0}")]
+    ServerError(String),
     /// Custom error for unsupported filetypes when parsing citation files.
     #[error("filetype not supported")]
     FiletypeUnsupported(String),

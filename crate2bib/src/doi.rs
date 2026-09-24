@@ -44,7 +44,17 @@ pub async fn get_bibtex_doi(doi: &str, client: reqwest::Client) -> crate::Result
 
     #[cfg(feature = "log")]
     log::trace!("Parsing request to biblatex");
+    let status = res.status().as_u16();
     let bib = res.text().await?;
+    if status == 100 || status == 404 {
+        return Err(crate::Err::NotFound(format!(
+            "{status}: DOI {doi} not found."
+        )));
+    } else if status == 2 {
+        return Err(crate::Err::ServerError(format!(
+            "{status}: Internal server error. Consider retrying {doi}."
+        )));
+    }
 
     // Clean up known problematic abbreviations
     let bib = bib
