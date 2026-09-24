@@ -64,10 +64,9 @@ fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &String) -> Element {
             "bibliography file".to_string(),
             repository.clone(),
             // None,
-            crate_name.clone(),
+            crate_name.to_string(),
         ),
     };
-    let height = format!("{entry}").lines().count() + 5;
     Success(Props {
         message: rsx! {
             p {
@@ -76,7 +75,7 @@ fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &String) -> Element {
                 " from "
                 a { href: link, {name} }
             }
-            textarea { class: "response", height: "{height}em", "{entry}" }
+            textarea { class: "response", "{entry}" }
         },
     })
 }
