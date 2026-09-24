@@ -103,27 +103,32 @@ pub fn Main() -> Element {
         let search_type = &values.get("search_type").unwrap();
         let full = &values.get("input_text").unwrap();
         if search_type == &"DOI" {
-            if let Ok(bib) = crate2bib::get_bibtex_doi_without_client(full, None).await {
-                let bib_output = match bib {
-                    BibReturn::BibFile(bib) => bib.to_biblatex_string(),
-                    BibReturn::String(s) => s,
+            match crate2bib::get_bibtex_doi_without_client(full, None).await {
+                Ok(bib) => {
+                    let bib_output = match bib {
+                        BibReturn::BibFile(bib) => bib.to_biblatex_string(),
+                        BibReturn::String(s) => s,
+                    }
+                    .split_once("\n")
+                    .map(|(first, rest)| format!("{}\n{rest}", first.replace("_", "")))
+                    .unwrap_or_default()
+                    .replace(",\n", ",\n    ")
+                    .replace(",\n    }", ",\n}")
+                    .trim_end()
+                    .to_string();
+                    messages.write().push(Success(Props {
+                        message: rsx! {
+                            p {
+                                "Found DOI "
+                                a { href: "https://doi.org/{full}", code { "{full}" } }
+                            }
+                            textarea { class: "response", "{bib_output}" }
+                        },
+                    }));
                 }
-                .split_once("\n")
-                .map(|(first, rest)| format!("{}\n{rest}", first.replace("_", "")))
-                .unwrap_or_default()
-                .replace(",\n", ",\n    ")
-                .replace(",\n    }", ",\n}")
-                .trim_end()
-                .to_string();
-                messages.write().push(Success(Props {
-                    message: rsx! {
-                        p {
-                            "Found DOI "
-                            a { href: "https://doi.org/{full}", code { "{full}" } }
-                        }
-                        textarea { class: "response", "{bib_output}" }
-                    },
-                }));
+                Err(e) => messages.write().push(Error(Props {
+                    message: rsx! { "ERROR: {e}"},
+                })),
             }
             return;
         };
