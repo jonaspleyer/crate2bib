@@ -82,6 +82,7 @@ h1, h2, h3, h4, h5 {
 
 #hero textarea {
     field-sizing: content;
+    white-space: nowrap;
 }
 
 a {
@@ -107,7 +108,7 @@ footer {
 
 .response {
     color: var(--color-text-code);
-    width: 80%;
+    width: 85%;
     padding: 1em;
     border: 1px white;
     background: var(--color-bg-code);
