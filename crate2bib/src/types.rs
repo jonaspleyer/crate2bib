@@ -15,7 +15,7 @@ pub type Result<T> = std::result::Result<T, Err>;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PlainBibLaTeX {
     /// Contains the whole bibliography with all keys.
-    pub bibliography: biblatex::Bibliography,
+    pub bibliography: BibReturn,
     /// Link to the repository
     pub repository: String,
     /// Name of the file where the citation was discovered
@@ -102,7 +102,10 @@ impl core::fmt::Display for BibLaTeX {
                 repository: url,
                 filename,
             }) => {
-                let mut output = bibliography.to_biblatex_string();
+                let mut output = match bibliography {
+                    BibReturn::BibFile(bib) => bib.to_biblatex_string(),
+                    BibReturn::String(s) => s.clone(),
+                };
                 let output = output.replace(",\n", ",\n    ");
                 let output = output.replace(",\n    }", ",\n}");
                 f.write_str(&output)

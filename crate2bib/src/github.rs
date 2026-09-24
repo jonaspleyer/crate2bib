@@ -61,7 +61,7 @@ async fn response_to_biblatex(
                 // .map_err(crate::Err::BibLaTeXParsing)
                 .map(|x| {
                     BibLaTeX::Plain(PlainBibLaTeX {
-                        bibliography: x,
+                        bibliography: crate::BibReturn::BibFile(x),
                         repository,
                         filename,
                     })

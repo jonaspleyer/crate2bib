@@ -300,6 +300,29 @@ pub async fn generate_biblatex_crates_io(
     })
 }
 
+/// asdf
+pub fn create_client(
+    user_agent: Option<&str>,
+    headers: Option<reqwest::header::HeaderMap>,
+) -> crate::Result<reqwest::Client> {
+    use reqwest::header::*;
+    #[cfg(feature = "log")]
+    log::trace!("Prepare Headers and Client");
+    let mut client_headers = HeaderMap::new();
+    if let Some(ua) = user_agent {
+        client_headers.insert(USER_AGENT, HeaderValue::from_str(ua)?);
+        if let Some(headers) = headers {
+            client_headers.extend(headers);
+        }
+    }
+
+    let client1 = reqwest::Client::builder()
+        .default_headers(client_headers)
+        .build()?;
+
+    Ok(client1)
+}
+
 /// Obtain multiple BibLaTeX entries from various sources such as crates.io, github and doi.org
 pub async fn get_biblatex(
     crate_name: &str,
@@ -309,17 +332,7 @@ pub async fn get_biblatex(
     filenames: Vec<&str>,
 ) -> crate::Result<Vec<crate::Result<crate::BibLaTeX>>> {
     use crates_io_api::AsyncClient;
-    use reqwest::header::*;
-    #[cfg(feature = "log")]
-    log::trace!("Prepare Headers and Client");
-    let mut headers = HeaderMap::new();
-    if let Some(ua) = user_agent {
-        headers.insert(USER_AGENT, HeaderValue::from_str(ua)?);
-    }
-
-    let client1 = reqwest::Client::builder()
-        .default_headers(headers)
-        .build()?;
+    let client1 = create_client(user_agent, None)?;
     let client =
         AsyncClient::with_http_client(client1.clone(), web_time::Duration::from_millis(1000));
     let r1 = generate_biblatex_crates_io(crate_name, version, &client).await?;

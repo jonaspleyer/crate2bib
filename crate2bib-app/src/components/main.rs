@@ -1,3 +1,4 @@
+use crate2bib::BibReturn;
 use dioxus::prelude::*;
 
 #[derive(PartialEq, Props, Clone)]
@@ -33,7 +34,7 @@ pub fn Note(props: Props) -> Element {
     }
 }
 
-fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &String) -> Element {
+fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &str) -> Element {
     let (name, link, found_message) = match entry {
         crate2bib::BibLaTeX::CratesIO(ref e) => (
             "crates.io".to_string(),
@@ -42,7 +43,7 @@ fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &String) -> Element {
             if let Some(v) = &e.version {
                 format!("{crate_name} {}", v)
             } else {
-                crate_name.clone()
+                crate_name.to_string()
             },
         ),
         crate2bib::BibLaTeX::CITATIONCFF(ref e) => (
@@ -52,7 +53,7 @@ fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &String) -> Element {
             if let Some(v) = &e.version {
                 format!("{crate_name} {}", v)
             } else {
-                crate_name.clone()
+                crate_name.to_string()
             },
         ),
         #[allow(unused)]
@@ -85,6 +86,8 @@ pub fn Main() -> Element {
     let mut messages = use_signal(circ_buffer::RingBuffer::<_, 8>::new);
 
     let update_form = move |event: Event<FormData>| async move {
+        event.prevent_default();
+
         let values: std::collections::HashMap<_, _> = event
             .data
             .values()
@@ -97,8 +100,42 @@ pub fn Main() -> Element {
                 }
             })
             .collect();
-        let crate_name = &values.get("crate_name").unwrap();
-        let version: Option<&String> = values.get("version");
+        let search_type = &values.get("search_type").unwrap();
+        let full = &values.get("input_text").unwrap();
+        if search_type == &"DOI" {
+            if let Ok(bib) = crate2bib::get_bibtex_doi_without_client(full, None).await {
+                let bib_output = match bib {
+                    BibReturn::BibFile(bib) => bib.to_biblatex_string(),
+                    BibReturn::String(s) => s,
+                }
+                .split_once("\n")
+                .map(|(first, rest)| format!("{}\n{rest}", first.replace("_", "")))
+                .unwrap_or_default()
+                .replace(",\n", ",\n    ")
+                .replace(",\n    }", ",\n}")
+                .trim_end()
+                .to_string();
+                messages.write().push(Success(Props {
+                    message: rsx! {
+                        p {
+                            "Found DOI "
+                            a { href: "https://doi.org/{full}", code { "{full}" } }
+                        }
+                        textarea { class: "response", "{bib_output}" }
+                    },
+                }));
+            }
+            return;
+        };
+
+        let (crate_name, version): (&str, Option<&str>) = if full.contains("@") {
+            let mut split = full.split("@");
+            let crate_name = split.next().unwrap_or_default();
+            let version = split.next();
+            (crate_name, version)
+        } else {
+            (full, None)
+        };
         let mut y = String::new();
         match crate2bib::get_biblatex(
             crate_name,

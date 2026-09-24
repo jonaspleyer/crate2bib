@@ -2,6 +2,8 @@ use dioxus::prelude::*;
 
 mod main;
 
+pub use main::Main;
+
 const PYPI_LOGO: Asset = asset!("/assets/pypi-logo.svg");
 const RUST_LOGO: Asset = asset!("/assets/rust-logo-white.svg");
 
@@ -30,5 +32,3 @@ pub fn Footer() -> Element {
         }
     }
 }
-
-pub use main::Main;

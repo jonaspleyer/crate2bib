@@ -12,6 +12,7 @@ crate2bib = { path = "../crate2bib", features = ["log"] }
 circ_buffer = "0.1.9"
 log.workspace = true
 tracing-log = "0.2.0"
+reqwest.workspace = true
 
 [features]
 default = ["web"]
