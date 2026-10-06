@@ -76,7 +76,7 @@ fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &str) -> Element {
                 " from "
                 a { href: link, {name} }
             }
-            textarea { class: "response", "{entry}" }
+            textarea { class: "response", readonly: true, "{entry}" }
         },
     })
 }
@@ -122,7 +122,7 @@ pub fn Main() -> Element {
                                 "Found DOI "
                                 a { href: "https://doi.org/{full}", code { "{full}" } }
                             }
-                            textarea { class: "response", "{bib_output}" }
+                            textarea { class: "response", readonly: true, "{bib_output}" }
                         },
                     }));
                 }
