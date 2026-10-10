@@ -154,6 +154,39 @@ pub fn Main() -> Element {
             return;
         };
 
+        if search_type == &"PyPI" {
+            let (package, version): (&str, Option<&str>) = if full.contains("@") {
+                let mut split = full.split("@");
+                (split.next().unwrap_or_default(), split.next())
+            } else {
+                (full, None)
+            };
+            let version = version.map(str::trim).filter(|v| !v.is_empty());
+            match crate2bib::generate_biblatex_pypi_without_client(package, version, None).await {
+                Ok(entry) => {
+                    let url = entry
+                        .url
+                        .clone()
+                        .unwrap_or_else(|| format!("https://pypi.org/project/{package}/"));
+                    messages.write().push(Success(Props {
+                        message: rsx! {
+                            p {
+                                "Found package "
+                                a { href: "{url}", code { "{package} {entry.version}" } }
+                                " on "
+                                a { href: "https://pypi.org/", "PyPI" }
+                            }
+                            textarea { class: "response", readonly: true, "{entry}" }
+                        },
+                    }));
+                }
+                Err(e) => messages.write().push(Error(Props {
+                    message: rsx! { "ERROR: {e}"},
+                })),
+            }
+            return;
+        };
+
         let (crate_name, version): (&str, Option<&str>) = if full.contains("@") {
             let mut split = full.split("@");
             let crate_name = split.next().unwrap_or_default();
@@ -200,7 +233,7 @@ pub fn Main() -> Element {
     rsx! {
         div { id: "hero", class: "middle",
             h1 { "crate2Bib" }
-            h3 { "Create a BibLaTeX entry from a given crate, DOI or archive.org item" }
+            h3 { "Create a BibLaTeX entry from a given crate, DOI, archive.org item or PyPI package" }
             form { onsubmit: update_form,
                 input {
                     name: "input_text",
@@ -211,6 +244,7 @@ pub fn Main() -> Element {
                     option { value: "crate", "crate" }
                     option { value: "DOI", "DOI" }
                     option { value: "archive.org", "archive.org" }
+                    option { value: "PyPI", "PyPI" }
                 }
                 input { value: "search", r#type: "submit" }
             }
@@ -238,6 +272,13 @@ pub fn Main() -> Element {
                 "Entries for books, articles and other items can be generated from a "
                 a { href: "https://archive.org/", "archive.org" }
                 " details URL or identifier."
+            }
+            p {
+                "Python packages are looked up on "
+                a { href: "https://pypi.org/", "PyPI" }
+                ". A specific version can be requested with "
+                code { "package@version" }
+                "."
             }
         }
     }
