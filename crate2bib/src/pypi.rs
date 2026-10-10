@@ -313,6 +313,42 @@ pub async fn generate_biblatex_pypi_without_client(
     generate_biblatex_pypi(package, version, &client).await
 }
 
+/// Obtains BibLaTeX entries for a package hosted on [PyPI](https://pypi.org).
+///
+/// In addition to the `@software` entry generated from the PyPI metadata this also scans the
+/// package's source repository for citation files (e.g. `CITATION.cff` or `citation.bib`) using
+/// [crate::github_search_files]. This way other citation types declared by the authors (such as
+/// a journal `@article`) are gathered as well. The returned entries are sorted by priority.
+pub async fn get_biblatex_pypi(
+    package: &str,
+    version: Option<&str>,
+    user_agent: Option<&str>,
+    branch_name: Option<&str>,
+    filenames: Vec<&str>,
+) -> crate::Result<Vec<crate::Result<crate::BibLaTeX>>> {
+    let client = crate::create_client(user_agent, None)?;
+
+    #[cfg(feature = "log")]
+    log::trace!("Obtain entry from PyPI");
+    let entry = generate_biblatex_pypi(package, version, &client).await?;
+    let url = entry.url.clone();
+
+    let mut results = vec![Ok(crate::BibLaTeX::PyPI(entry))];
+
+    #[cfg(feature = "log")]
+    log::trace!("Scan source repository for citation files");
+    if let Some(u) = url {
+        results
+            .extend(crate::github_search_files(&client, &u, filenames, branch_name, true).await?);
+    }
+
+    #[cfg(feature = "log")]
+    log::trace!("Sort obtained entries by priority");
+    results.sort_by_key(|x| u8::MAX - x.as_ref().map(|x| x.priority()).unwrap_or_default());
+
+    Ok(results)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -346,6 +382,28 @@ mod tests {
 }";
         assert_eq!(format!("{entry}"), expected);
         assert_eq!(entry.work_type, "software");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn numpy_gathers_github_citation() -> crate::Result<()> {
+        let results = get_biblatex_pypi(
+            "numpy",
+            None,
+            Some("crate2bib-testing"),
+            None,
+            vec!["CITATION.cff", "CITATION.bib", "citation.bib"],
+        )
+        .await?;
+
+        // The PyPI metadata yields a `@software` entry ...
+        assert!(results
+            .iter()
+            .any(|r| matches!(r, Ok(crate::BibLaTeX::PyPI(_)))));
+        // ... and numpy's CITATION.bib yields a parsed bibliography (here an `@article`).
+        assert!(results
+            .iter()
+            .any(|r| matches!(r, Ok(crate::BibLaTeX::Plain(_)))));
         Ok(())
     }
 }

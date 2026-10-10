@@ -46,6 +46,13 @@ fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &str) -> Element {
                 crate_name.to_string()
             },
         ),
+        crate2bib::BibLaTeX::PyPI(ref e) => (
+            "PyPI".to_string(),
+            e.url
+                .clone()
+                .unwrap_or_else(|| format!("https://pypi.org/project/{crate_name}/")),
+            format!("{crate_name} {}", e.version),
+        ),
         crate2bib::BibLaTeX::CITATIONCFF(ref e) => (
             "CITATION.cff".to_string(),
             e.url.clone().map_or("".to_string(), |x| format!("{x}")),
@@ -162,23 +169,24 @@ pub fn Main() -> Element {
                 (full, None)
             };
             let version = version.map(str::trim).filter(|v| !v.is_empty());
-            match crate2bib::generate_biblatex_pypi_without_client(package, version, None).await {
-                Ok(entry) => {
-                    let url = entry
-                        .url
-                        .clone()
-                        .unwrap_or_else(|| format!("https://pypi.org/project/{package}/"));
-                    messages.write().push(Success(Props {
-                        message: rsx! {
-                            p {
-                                "Found package "
-                                a { href: "{url}", code { "{package} {entry.version}" } }
-                                " on "
-                                a { href: "https://pypi.org/", "PyPI" }
-                            }
-                            textarea { class: "response", readonly: true, "{entry}" }
-                        },
-                    }));
+            match crate2bib::get_biblatex_pypi(
+                package,
+                version,
+                None,
+                None,
+                vec!["CITATION.cff", "CITATION.bib", "citation.bib"],
+            )
+            .await
+            {
+                Ok(results) => {
+                    for entry in results.into_iter().rev() {
+                        match entry {
+                            Ok(entry) => messages.write().push(convert_entry(entry, package)),
+                            Err(e) => messages.write().push(Error(Props {
+                                message: rsx! { "ERROR: {e}" },
+                            })),
+                        }
+                    }
                 }
                 Err(e) => messages.write().push(Error(Props {
                     message: rsx! { "ERROR: {e}"},

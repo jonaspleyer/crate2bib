@@ -72,6 +72,8 @@ impl From<Err> for PyErr {
 pub enum BibLaTeX {
     /// Obtained bib entry form [crates.io](https://crates.io)
     CratesIO(BibLaTeXCratesIO),
+    /// Obtained bib entry from a package hosted on [PyPI](https://pypi.org).
+    PyPI(BibLaTeXPyPI),
     /// Obtained bib entry from `CITAIION.cff` inside repository.
     CITATIONCFF(citeworks_cff::Cff),
     /// Obtained bib entry directly from repository.
@@ -82,6 +84,7 @@ impl core::fmt::Display for BibLaTeX {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             BibLaTeX::CratesIO(b) => b.fmt(f),
+            BibLaTeX::PyPI(b) => b.fmt(f),
             BibLaTeX::CITATIONCFF(b) => {
                 let bib = BibLaTeXCratesIO::from_citation_cff(b).unwrap();
                 bib.fmt(f)
@@ -109,6 +112,7 @@ impl BibLaTeX {
         use BibLaTeX::*;
         match self {
             CratesIO(_) => 20,
+            PyPI(_) => 20,
             CITATIONCFF(_) => 10,
             Plain(_) => 50,
         }
