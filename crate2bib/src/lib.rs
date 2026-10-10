@@ -6,6 +6,8 @@
 #![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+#[path = "archive-org.rs"]
+mod archive_org;
 mod crates_io;
 mod doi;
 mod github;
@@ -14,6 +16,7 @@ mod github;
 mod python;
 mod types;
 
+pub use archive_org::*;
 pub use crates_io::*;
 pub use doi::*;
 pub use github::*;

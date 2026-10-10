@@ -133,6 +133,27 @@ pub fn Main() -> Element {
             return;
         };
 
+        if search_type == &"archive.org" {
+            match crate2bib::generate_biblatex_archive_org_without_client(full, None).await {
+                Ok(entry) => {
+                    let url = entry.url.clone();
+                    messages.write().push(Success(Props {
+                        message: rsx! {
+                            p {
+                                "Found archive.org item "
+                                a { href: "{url}", code { "{entry.identifier}" } }
+                            }
+                            textarea { class: "response", readonly: true, "{entry}" }
+                        },
+                    }));
+                }
+                Err(e) => messages.write().push(Error(Props {
+                    message: rsx! { "ERROR: {e}"},
+                })),
+            }
+            return;
+        };
+
         let (crate_name, version): (&str, Option<&str>) = if full.contains("@") {
             let mut split = full.split("@");
             let crate_name = split.next().unwrap_or_default();
@@ -179,7 +200,7 @@ pub fn Main() -> Element {
     rsx! {
         div { id: "hero", class: "middle",
             h1 { "crate2Bib" }
-            h3 { "Create a BibLaTeX entry from a given crate or DOI" }
+            h3 { "Create a BibLaTeX entry from a given crate, DOI or archive.org item" }
             form { onsubmit: update_form,
                 input {
                     name: "input_text",
@@ -189,6 +210,7 @@ pub fn Main() -> Element {
                 select { name: "search_type",
                     option { value: "crate", "crate" }
                     option { value: "DOI", "DOI" }
+                    option { value: "archive.org", "archive.org" }
                 }
                 input { value: "search", r#type: "submit" }
             }
@@ -211,6 +233,11 @@ pub fn Main() -> Element {
             p {
                 "BibTeX entries for DOIs are obtained directly from "
                 a { href: "https://doi.org/", "doi.org" }
+            }
+            p {
+                "Entries for books, articles and other items can be generated from a "
+                a { href: "https://archive.org/", "archive.org" }
+                " details URL or identifier."
             }
         }
     }
