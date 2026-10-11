@@ -213,7 +213,7 @@ pub async fn generate_biblatex_julia_without_client(
 ///
 /// In addition to the `@software` entry generated from the registry metadata this also scans the
 /// package's source repository for citation files (e.g. `CITATION.cff` or `citation.bib`) using
-/// [crate::github_search_files]. This way other citation types declared by the authors (such as a
+/// [crate::githost_search_files]. This way other citation types declared by the authors (such as a
 /// journal `@article`) are gathered as well. The returned entries are sorted by priority.
 pub async fn get_biblatex_julia(
     package: &str,
@@ -235,7 +235,7 @@ pub async fn get_biblatex_julia(
     log::trace!("Scan source repository for citation files");
     if let Some(u) = url {
         results
-            .extend(crate::github_search_files(&client, &u, filenames, branch_name, true).await?);
+            .extend(crate::githost_search_files(&client, &u, filenames, branch_name, true).await?);
     }
 
     #[cfg(feature = "log")]

@@ -1,5 +1,5 @@
 //! Search and create BibLaTeX entries for crates hosted on [crates.io](https://crates.io)
-//! or retrieve them from their github repository.
+//! or retrieve them from their source repository hosted on a git server.
 //!
 //! This crate can be used in a web version under
 //! [jonaspleyer.github.io/crate2bib](https://jonaspleyer.github.io/crate2bib).
@@ -10,7 +10,7 @@
 mod archive_org;
 mod crates_io;
 mod doi;
-mod github;
+mod githost;
 mod julia;
 mod pypi;
 #[cfg_attr(docsrs, doc(cfg(feature = "pyo3")))]
@@ -21,7 +21,7 @@ mod types;
 pub use archive_org::*;
 pub use crates_io::*;
 pub use doi::*;
-pub use github::*;
+pub use githost::*;
 pub use julia::*;
 pub use pypi::*;
 pub use types::*;

@@ -345,7 +345,7 @@ pub async fn get_biblatex(
     log::trace!("Obtain other entries");
     if let Some(u) = url {
         results
-            .extend(crate::github_search_files(&client1, &u, filenames, branch_name, true).await?);
+            .extend(crate::githost_search_files(&client1, &u, filenames, branch_name, true).await?);
     }
     #[cfg(feature = "log")]
     log::trace!("Sort obtained entries by priority");
