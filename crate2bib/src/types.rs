@@ -58,6 +58,9 @@ pub enum Err {
     /// Wraps [base64::DecodeError]
     #[error("error during decoding")]
     Base64DecodeError(#[from] base64::DecodeError),
+    /// Wraps [toml::de::Error]
+    #[error("error during parsing of TOML file")]
+    TomlParsing(#[from] toml::de::Error),
 }
 
 #[cfg(feature = "pyo3")]
@@ -74,6 +77,8 @@ pub enum BibLaTeX {
     CratesIO(BibLaTeXCratesIO),
     /// Obtained bib entry from a package hosted on [PyPI](https://pypi.org).
     PyPI(BibLaTeXPyPI),
+    /// Obtained bib entry from a package registered in the Julia General registry.
+    Julia(BibLaTeXJulia),
     /// Obtained bib entry from `CITAIION.cff` inside repository.
     CITATIONCFF(citeworks_cff::Cff),
     /// Obtained bib entry directly from repository.
@@ -85,6 +90,7 @@ impl core::fmt::Display for BibLaTeX {
         match self {
             BibLaTeX::CratesIO(b) => b.fmt(f),
             BibLaTeX::PyPI(b) => b.fmt(f),
+            BibLaTeX::Julia(b) => b.fmt(f),
             BibLaTeX::CITATIONCFF(b) => {
                 let bib = BibLaTeXCratesIO::from_citation_cff(b).unwrap();
                 bib.fmt(f)
@@ -113,6 +119,7 @@ impl BibLaTeX {
         match self {
             CratesIO(_) => 20,
             PyPI(_) => 20,
+            Julia(_) => 20,
             CITATIONCFF(_) => 10,
             Plain(_) => 50,
         }

@@ -53,6 +53,13 @@ fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &str) -> Element {
                 .unwrap_or_else(|| format!("https://pypi.org/project/{crate_name}/")),
             format!("{crate_name} {}", e.version),
         ),
+        crate2bib::BibLaTeX::Julia(ref e) => (
+            "Julia".to_string(),
+            e.url.clone().unwrap_or_else(|| {
+                format!("https://juliahub.com/ui/Packages/General/{crate_name}")
+            }),
+            format!("{crate_name} {}", e.version),
+        ),
         crate2bib::BibLaTeX::CITATIONCFF(ref e) => (
             "CITATION.cff".to_string(),
             e.url.clone().map_or("".to_string(), |x| format!("{x}")),
@@ -195,6 +202,40 @@ pub fn Main() -> Element {
             return;
         };
 
+        if search_type == &"Julia" {
+            let (package, version): (&str, Option<&str>) = if full.contains("@") {
+                let mut split = full.split("@");
+                (split.next().unwrap_or_default(), split.next())
+            } else {
+                (full, None)
+            };
+            let version = version.map(str::trim).filter(|v| !v.is_empty());
+            match crate2bib::get_biblatex_julia(
+                package,
+                version,
+                None,
+                None,
+                vec!["CITATION.cff", "CITATION.bib", "citation.bib"],
+            )
+            .await
+            {
+                Ok(results) => {
+                    for entry in results.into_iter().rev() {
+                        match entry {
+                            Ok(entry) => messages.write().push(convert_entry(entry, package)),
+                            Err(e) => messages.write().push(Error(Props {
+                                message: rsx! { "ERROR: {e}" },
+                            })),
+                        }
+                    }
+                }
+                Err(e) => messages.write().push(Error(Props {
+                    message: rsx! { "ERROR: {e}"},
+                })),
+            }
+            return;
+        };
+
         let (crate_name, version): (&str, Option<&str>) = if full.contains("@") {
             let mut split = full.split("@");
             let crate_name = split.next().unwrap_or_default();
@@ -241,7 +282,7 @@ pub fn Main() -> Element {
     rsx! {
         div { id: "hero", class: "middle",
             h1 { "crate2Bib" }
-            h3 { "Create a BibLaTeX entry from a given crate, DOI, archive.org item or PyPI package" }
+            h3 { "Create a BibLaTeX entry from a given crate, DOI, archive.org item, PyPI package or Julia package" }
             form { onsubmit: update_form,
                 input {
                     name: "input_text",
@@ -253,6 +294,7 @@ pub fn Main() -> Element {
                     option { value: "DOI", "DOI" }
                     option { value: "archive.org", "archive.org" }
                     option { value: "PyPI", "PyPI" }
+                    option { value: "Julia", "Julia" }
                 }
                 input { value: "search", r#type: "submit" }
             }
@@ -284,6 +326,13 @@ pub fn Main() -> Element {
             p {
                 "Python packages are looked up on "
                 a { href: "https://pypi.org/", "PyPI" }
+                ". A specific version can be requested with "
+                code { "package@version" }
+                "."
+            }
+            p {
+                "Julia packages are looked up in the "
+                a { href: "https://github.com/JuliaRegistries/General", "General registry" }
                 ". A specific version can be requested with "
                 code { "package@version" }
                 "."
