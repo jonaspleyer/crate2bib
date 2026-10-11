@@ -14,6 +14,7 @@ mod archive_org;
 mod crates_io;
 mod doi;
 mod githost;
+mod isbn;
 mod julia;
 mod pypi;
 #[cfg_attr(docsrs, doc(cfg(feature = "pyo3")))]
@@ -25,6 +26,7 @@ pub use archive_org::*;
 pub use crates_io::*;
 pub use doi::*;
 pub use githost::*;
+pub use isbn::*;
 pub use julia::*;
 pub use pypi::*;
 pub use types::*;

@@ -11,7 +11,7 @@ Converts various sources into BibLaTeX entries.
 
 `x2bib` generates entries for crates on [crates.io](https://crates.io), packages on
 [PyPI](https://pypi.org) and the [Julia General registry](https://github.com/JuliaRegistries/General),
-as well as for DOIs and [archive.org](https://archive.org) items.
+as well as for DOIs, books (by ISBN) and [archive.org](https://archive.org) items.
 It will further try to determine if a publication is already available by scanning the source
 repository (github, codeberg or gitlab) for possible `CITATION.cff` or `citation.bib` files.
 There are 4 distinct ways of using this package:

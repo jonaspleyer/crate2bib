@@ -168,6 +168,27 @@ pub fn Main() -> Element {
             return;
         };
 
+        if search_type == &"ISBN" {
+            match x2bib::generate_biblatex_isbn_without_client(full, None).await {
+                Ok(entry) => {
+                    let isbn = entry.isbn.clone();
+                    messages.write().push(Success(Props {
+                        message: rsx! {
+                            p {
+                                "Found book with ISBN "
+                                code { "{isbn}" }
+                            }
+                            textarea { class: "response", readonly: true, "{entry}" }
+                        },
+                    }));
+                }
+                Err(e) => messages.write().push(Error(Props {
+                    message: rsx! { "ERROR: {e}"},
+                })),
+            }
+            return;
+        };
+
         if search_type == &"PyPI" {
             let (package, version): (&str, Option<&str>) = if full.contains("@") {
                 let mut split = full.split("@");
@@ -282,7 +303,7 @@ pub fn Main() -> Element {
     rsx! {
         div { id: "hero", class: "middle",
             h1 { "x2bib" }
-            h3 { "Create a BibLaTeX entry from a given crate, DOI, archive.org item, PyPI package or Julia package" }
+            h3 { "Create a BibLaTeX entry from a given crate, DOI, archive.org item, PyPI package, Julia package or ISBN" }
             form { onsubmit: update_form,
                 input {
                     name: "input_text",
@@ -295,6 +316,7 @@ pub fn Main() -> Element {
                     option { value: "archive.org", "archive.org" }
                     option { value: "PyPI", "PyPI" }
                     option { value: "Julia", "Julia" }
+                    option { value: "ISBN", "ISBN" }
                 }
                 input { value: "search", r#type: "submit" }
             }
@@ -336,6 +358,13 @@ pub fn Main() -> Element {
                 ". A specific version can be requested with "
                 code { "package@version" }
                 "."
+            }
+            p {
+                "Books can be cited by their ISBN, resolved via "
+                a { href: "https://openlibrary.org/", "Open Library" }
+                " (with a "
+                a { href: "https://books.google.com/", "Google Books" }
+                " fallback)."
             }
         }
     }
