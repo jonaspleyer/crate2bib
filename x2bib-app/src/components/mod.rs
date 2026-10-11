@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 
 mod main;
+mod source;
 
 pub use main::Main;
 
