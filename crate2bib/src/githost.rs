@@ -7,12 +7,21 @@ use crate::{BibLaTeX, PlainBibLaTeX};
 /// Every supported service is simply one variant of this enum. None of them is treated as more
 /// important than the others. Adding support for a new git server therefore only requires adding a
 /// new variant and filling in the matching arms of the methods below.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 enum GitHost {
     /// [github.com](https://github.com)
     GitHub,
     /// [codeberg.org](https://codeberg.org) (powered by Forgejo/Gitea)
     Codeberg,
+    /// A [GitLab](https://gitlab.com) instance.
+    ///
+    /// GitLab can be self-hosted, so the instance is not necessarily reachable under `gitlab.com`.
+    /// `base` stores the scheme and host of the instance (e.g. `https://gitlab.com` or
+    /// `https://gitlab.example.com`), without a trailing slash.
+    GitLab {
+        /// Scheme and host of the GitLab instance.
+        base: String,
+    },
 }
 
 /// Describes how the raw contents of a file are encoded in a git host's response.
@@ -25,24 +34,46 @@ enum ContentEncoding {
     GiteaJsonBase64,
 }
 
-impl GitHost {
-    /// All git hosts known to this crate.
-    const ALL: &'static [GitHost] = &[GitHost::GitHub, GitHost::Codeberg];
+/// Extracts the scheme and host (e.g. `https://gitlab.example.com`) of a repository URL if its host
+/// looks like a GitLab instance.
+///
+/// Self-hosted instances can live under arbitrary domains, so they are recognized heuristically by
+/// a host name that contains `gitlab`. This covers `gitlab.com` as well as instances such as
+/// `gitlab.example.com`.
+fn gitlab_base(repository: &str) -> Option<String> {
+    let (scheme, rest) = repository.split_once("://")?;
+    let host = rest.split('/').next()?;
+    if host.contains("gitlab") {
+        Some(format!("{scheme}://{host}"))
+    } else {
+        None
+    }
+}
 
+impl GitHost {
     /// The domain (including a trailing slash) identifying this host inside a repository URL.
-    fn domain(&self) -> &'static str {
+    fn domain(&self) -> String {
         match self {
-            GitHost::GitHub => "github.com/",
-            GitHost::Codeberg => "codeberg.org/",
+            GitHost::GitHub => "github.com/".to_string(),
+            GitHost::Codeberg => "codeberg.org/".to_string(),
+            GitHost::GitLab { base } => {
+                let host = base.split_once("://").map_or(base.as_str(), |(_, h)| h);
+                format!("{host}/")
+            }
         }
     }
 
     /// Detects which [GitHost] a repository URL belongs to, if any.
+    ///
+    /// The hosts are all considered equal; detection simply returns the first one that matches.
     fn detect(repository: &str) -> Option<Self> {
-        GitHost::ALL
-            .iter()
-            .copied()
-            .find(|host| repository.contains(host.domain()))
+        if repository.contains("github.com/") {
+            Some(GitHost::GitHub)
+        } else if repository.contains("codeberg.org/") {
+            Some(GitHost::Codeberg)
+        } else {
+            gitlab_base(repository).map(|base| GitHost::GitLab { base })
+        }
     }
 
     /// URL of the API endpoint returning repository metadata (used to determine the default branch).
@@ -50,6 +81,8 @@ impl GitHost {
         match self {
             GitHost::GitHub => format!("https://api.github.com/repos/{owner}/{repo}"),
             GitHost::Codeberg => format!("https://codeberg.org/api/v1/repos/{owner}/{repo}"),
+            // GitLab identifies a project by the URL-encoded `owner/repo` path.
+            GitHost::GitLab { base } => format!("{base}/api/v4/projects/{owner}%2F{repo}"),
         }
     }
 
@@ -72,6 +105,13 @@ impl GitHost {
                     {filename}/\
                     ?ref={branch_name}"
             ),
+            GitHost::GitLab { base } => format!(
+                "{base}/api/v4/projects/\
+                    {owner}%2F{repo}/\
+                    repository/files/\
+                    {filename}/\
+                    raw?ref={branch_name}"
+            ),
         }
     }
 
@@ -80,6 +120,8 @@ impl GitHost {
         match self {
             GitHost::GitHub => ContentEncoding::Raw,
             GitHost::Codeberg => ContentEncoding::GiteaJsonBase64,
+            // GitLab's `.../raw` endpoint returns the file content directly.
+            GitHost::GitLab { .. } => ContentEncoding::Raw,
         }
     }
 }
@@ -93,10 +135,12 @@ async fn extract_content(
     repository: &str,
     filename: &str,
 ) -> crate::Result<Option<String>> {
+    let response = response.await?;
+    let not_found = response.status().as_u16() == 404;
     match encoding {
         ContentEncoding::Raw => {
-            let text = response.await?.text().await?;
-            if text.to_lowercase().trim() == "404: not found" {
+            let text = response.text().await?;
+            if not_found || text.to_lowercase().trim() == "404: not found" {
                 #[cfg(feature = "log")]
                 log::warn!(
                     "Could not find file \"{filename}\" in repository \"{repository}\". \
@@ -109,8 +153,11 @@ async fn extract_content(
             }
         }
         ContentEncoding::GiteaJsonBase64 => {
+            if not_found {
+                return Ok(None);
+            }
             use base64::Engine;
-            let json = response.await?.json::<serde_json::Value>().await?;
+            let json = response.json::<serde_json::Value>().await?;
             if let Some(content) = json.get("content") {
                 let content = content.as_str().unwrap_or_default();
                 let bytes = base64::prelude::BASE64_STANDARD.decode(content)?;
@@ -196,7 +243,8 @@ async fn response_to_biblatex(
 /// Searches a git-hosted repository for citation files.
 ///
 /// The git hosting service is detected automatically from the repository URL. Currently
-/// [github.com](https://github.com) and [codeberg.org](https://codeberg.org) are supported and all
+/// [github.com](https://github.com), [codeberg.org](https://codeberg.org) and
+/// [GitLab](https://gitlab.com) instances (including self-hosted ones) are supported and all
 /// treated equally.
 pub async fn githost_search_files(
     client: &reqwest::Client,
@@ -211,7 +259,7 @@ pub async fn githost_search_files(
             #[cfg(feature = "log")]
             {
                 log::warn!("Cannot query {repository}");
-                log::warn!("Currently only github & codeberg repositories are supported.");
+                log::warn!("Currently only github, codeberg & gitlab repositories are supported.");
             }
             return Ok(vec![]);
         }
@@ -224,7 +272,7 @@ pub async fn githost_search_files(
     }
 
     let mut results = vec![];
-    let segments: Vec<_> = repository.split(host.domain()).collect();
+    let segments: Vec<_> = repository.split(host.domain().as_str()).collect();
     if let Some(tail) = segments.get(1) {
         let segments2: Vec<_> = tail.split("/").collect();
         let owner = segments2.first();
@@ -273,4 +321,54 @@ pub async fn githost_search_files(
         }
     }
     Ok(results)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn detect_known_hosts() {
+        assert_eq!(
+            GitHost::detect("https://github.com/serde-rs/serde"),
+            Some(GitHost::GitHub)
+        );
+        assert_eq!(
+            GitHost::detect("https://codeberg.org/sarah/faer"),
+            Some(GitHost::Codeberg)
+        );
+        assert_eq!(GitHost::detect("https://example.com/foo/bar"), None);
+    }
+
+    #[test]
+    fn detect_gitlab_dot_com_and_self_hosted() {
+        assert_eq!(
+            GitHost::detect("https://gitlab.com/group/project"),
+            Some(GitHost::GitLab {
+                base: "https://gitlab.com".to_string()
+            })
+        );
+        assert_eq!(
+            GitHost::detect("https://gitlab.example.com/group/project"),
+            Some(GitHost::GitLab {
+                base: "https://gitlab.example.com".to_string()
+            })
+        );
+    }
+
+    #[test]
+    fn gitlab_urls_are_built_correctly() {
+        let host = GitHost::GitLab {
+            base: "https://gitlab.com".to_string(),
+        };
+        assert_eq!(host.domain(), "gitlab.com/");
+        assert_eq!(
+            host.api_repo_url("group", "project"),
+            "https://gitlab.com/api/v4/projects/group%2Fproject"
+        );
+        assert_eq!(
+            host.content_url("group", "project", "main", "CITATION.cff"),
+            "https://gitlab.com/api/v4/projects/group%2Fproject/repository/files/CITATION.cff/raw?ref=main"
+        );
+    }
 }
