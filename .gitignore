@@ -1,6 +1,6 @@
 target
 Cargo.lock
-crate2bib/test/__pycache__
+x2bib/test/__pycache__
 
 paper/*.aux
 paper/*.bbl

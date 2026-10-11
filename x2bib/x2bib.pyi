@@ -9,7 +9,7 @@ __all__ = [
 
 def get_biblatex(crate_name: builtins.str, version: typing.Optional[builtins.str] = None, user_agent: typing.Optional[builtins.str] = None, branch_name: typing.Optional[builtins.str] = None, filenames: typing.Sequence[builtins.str] = ['CITATION.cff', 'citation.bib']) -> typing.Any:
     r"""
-    Wraps the [crate2bib::get_biblatex] function.
+    Wraps the [x2bib::get_biblatex] function.
     
     Args:
         crate_name(str): Name of the crate to get BibLaTeX entry

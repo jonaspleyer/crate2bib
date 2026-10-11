@@ -1,23 +1,25 @@
-[![Crates.io Version](https://img.shields.io/crates/v/crate2bib?style=flat-square)](https://crates.io/crates/crate2bib)
+[![Crates.io Version](https://img.shields.io/crates/v/x2bib?style=flat-square)](https://crates.io/crates/x2bib)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jonaspleyer/crate2bib/webapp.yml?style=flat-square&label=Build)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jonaspleyer/crate2bib/test.yml?style=flat-square&label=Test)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jonaspleyer/crate2bib/maturin.yml?style=flat-square&label=Release)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jonaspleyer/crate2bib/pytest.yml?style=flat-square&label=Pytest)
-[![PyPI - Version](https://img.shields.io/pypi/v/crate2bib?style=flat-square)](https://pypi.org/project/crate2bib/)
+[![PyPI - Version](https://img.shields.io/pypi/v/x2bib?style=flat-square)](https://pypi.org/project/x2bib/)
 
-# crate2bib
+# x2bib
 
-Converts a given crate and version number to a BibLaTeX entry.
+Converts various sources into BibLaTeX entries.
 
-The crate will try to determine if a publication is already available by scanning for possible
-`CITATION.cff` files.
-It will further generate entries from the information available at [crates.io](https://crates.io).
+`x2bib` generates entries for crates on [crates.io](https://crates.io), packages on
+[PyPI](https://pypi.org) and the [Julia General registry](https://github.com/JuliaRegistries/General),
+as well as for DOIs and [archive.org](https://archive.org) items.
+It will further try to determine if a publication is already available by scanning the source
+repository (github, codeberg or gitlab) for possible `CITATION.cff` or `citation.bib` files.
 There are 4 distinct ways of using this package:
 
 1. Webapp [jonaspleyer/.github.io/crate2bib](https://jonaspleyer.github.io/crate2bib/)
-2. Python bindings [pypi.org/project/crate2bib](https://pypi.org/project/crate2bib/)
+2. Python bindings [pypi.org/project/x2bib](https://pypi.org/project/x2bib/)
 3. CLI tool [crate2bib-cli](https://github.com/jonaspleyer/tree/main/crate2bib)
-4. Rust crate [crate2bib](https://crates.io/crate2bib)
+4. Rust crate [x2bib](https://crates.io/crates/x2bib)
 
 ```Python
 def get_biblatex(
@@ -28,7 +30,7 @@ def get_biblatex(
         filenames: Sequence[str] = ['CITATION.cff', 'citation.bib'],
     ) -> typing.Any:
     r"""
-    Wraps the [crate2bib::get_biblatex] function.
+    Wraps the [x2bib::get_biblatex] function.
 
     Args:
         crate_name: Name of the crate to get BibLaTeX entry
@@ -46,7 +48,7 @@ def get_biblatex(
 
 ```Python
 import asyncio
-from crate2bib import get_biblatex
+from x2bib import get_biblatex
 
 async def obtain_result():
     results = await get_biblatex(

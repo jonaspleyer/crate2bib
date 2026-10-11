@@ -1,4 +1,4 @@
-use crate2bib::BibReturn;
+use x2bib::BibReturn;
 use dioxus::prelude::*;
 
 #[derive(PartialEq, Props, Clone)]
@@ -34,9 +34,9 @@ pub fn Note(props: Props) -> Element {
     }
 }
 
-fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &str) -> Element {
+fn convert_entry(entry: x2bib::BibLaTeX, crate_name: &str) -> Element {
     let (name, link, found_message) = match entry {
-        crate2bib::BibLaTeX::CratesIO(ref e) => (
+        x2bib::BibLaTeX::CratesIO(ref e) => (
             "crates.io".to_string(),
             format!("https://crates.io/crates/{crate_name}"),
             // e.version.as_ref().map(|x| format!("{x}")),
@@ -46,21 +46,21 @@ fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &str) -> Element {
                 crate_name.to_string()
             },
         ),
-        crate2bib::BibLaTeX::PyPI(ref e) => (
+        x2bib::BibLaTeX::PyPI(ref e) => (
             "PyPI".to_string(),
             e.url
                 .clone()
                 .unwrap_or_else(|| format!("https://pypi.org/project/{crate_name}/")),
             format!("{crate_name} {}", e.version),
         ),
-        crate2bib::BibLaTeX::Julia(ref e) => (
+        x2bib::BibLaTeX::Julia(ref e) => (
             "Julia".to_string(),
             e.url.clone().unwrap_or_else(|| {
                 format!("https://juliahub.com/ui/Packages/General/{crate_name}")
             }),
             format!("{crate_name} {}", e.version),
         ),
-        crate2bib::BibLaTeX::CITATIONCFF(ref e) => (
+        x2bib::BibLaTeX::CITATIONCFF(ref e) => (
             "CITATION.cff".to_string(),
             e.url.clone().map_or("".to_string(), |x| format!("{x}")),
             // e.version.clone(),
@@ -71,7 +71,7 @@ fn convert_entry(entry: crate2bib::BibLaTeX, crate_name: &str) -> Element {
             },
         ),
         #[allow(unused)]
-        crate2bib::BibLaTeX::Plain(crate2bib::PlainBibLaTeX {
+        x2bib::BibLaTeX::Plain(x2bib::PlainBibLaTeX {
             ref bibliography,
             ref repository,
             ref filename,
@@ -117,7 +117,7 @@ pub fn Main() -> Element {
         let search_type = &values.get("search_type").unwrap();
         let full = &values.get("input_text").unwrap();
         if search_type == &"DOI" {
-            match crate2bib::get_bibtex_doi_without_client(full, None).await {
+            match x2bib::get_bibtex_doi_without_client(full, None).await {
                 Ok(bib) => {
                     let bib_output = match bib {
                         BibReturn::BibFile(bib) => bib.to_biblatex_string(),
@@ -148,7 +148,7 @@ pub fn Main() -> Element {
         };
 
         if search_type == &"archive.org" {
-            match crate2bib::generate_biblatex_archive_org_without_client(full, None).await {
+            match x2bib::generate_biblatex_archive_org_without_client(full, None).await {
                 Ok(entry) => {
                     let url = entry.url.clone();
                     messages.write().push(Success(Props {
@@ -176,7 +176,7 @@ pub fn Main() -> Element {
                 (full, None)
             };
             let version = version.map(str::trim).filter(|v| !v.is_empty());
-            match crate2bib::get_biblatex_pypi(
+            match x2bib::get_biblatex_pypi(
                 package,
                 version,
                 None,
@@ -210,7 +210,7 @@ pub fn Main() -> Element {
                 (full, None)
             };
             let version = version.map(str::trim).filter(|v| !v.is_empty());
-            match crate2bib::get_biblatex_julia(
+            match x2bib::get_biblatex_julia(
                 package,
                 version,
                 None,
@@ -245,7 +245,7 @@ pub fn Main() -> Element {
             (full, None)
         };
         let mut y = String::new();
-        match crate2bib::get_biblatex(
+        match x2bib::get_biblatex(
             crate_name,
             version.and_then(|x| {
                 y = x.replace(" ", "");
@@ -281,7 +281,7 @@ pub fn Main() -> Element {
 
     rsx! {
         div { id: "hero", class: "middle",
-            h1 { "crate2Bib" }
+            h1 { "x2bib" }
             h3 { "Create a BibLaTeX entry from a given crate, DOI, archive.org item, PyPI package or Julia package" }
             form { onsubmit: update_form,
                 input {
@@ -307,7 +307,7 @@ pub fn Main() -> Element {
             }
 
             p {
-                a { href: "https://github.com/jonaspleyer/crate2bib", "crate2bib" }
+                a { href: "https://github.com/jonaspleyer/crate2bib", "x2bib" }
                 " scans "
                 a { href: "https://crates.io/", "crates.io" }
                 " for possible candidates and then searches for any "

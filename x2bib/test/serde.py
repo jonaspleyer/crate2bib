@@ -1,5 +1,5 @@
 import asyncio
-from crate2bib import get_biblatex
+from x2bib import get_biblatex
 
 
 async def obtain_result():

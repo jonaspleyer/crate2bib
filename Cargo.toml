@@ -2,8 +2,8 @@
 resolver = "2"
 
 members = [
-    "crate2bib",
-    "crate2bib-app",
+    "x2bib",
+    "x2bib-app",
     "crate2bib-cli",
 ]
 

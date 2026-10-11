@@ -14,11 +14,11 @@ pub fn Footer() -> Element {
             div { class: "middle",
                 a {
                     class: "nav-item",
-                    href: "https://pypi.org/project/crate2bib/",
+                    href: "https://pypi.org/project/x2bib/",
                     img { src: PYPI_LOGO }
                     "Python Docs"
                 }
-                a { class: "nav-item", href: "https://docs.rs/crate2bib",
+                a { class: "nav-item", href: "https://docs.rs/x2bib",
                     img { src: RUST_LOGO }
                     "Rust Docs"
                 }

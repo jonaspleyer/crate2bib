@@ -1,0 +1,11 @@
+[application]
+name = "x2bib"
+# asset_dir = "assets"
+
+[web.watchter]
+index_on_404 = true
+
+[web.app]
+title = "x2bib"
+# Kept as "crate2bib" because GitHub Pages serves the site from the (unchanged) repository name.
+base_path = "crate2bib"

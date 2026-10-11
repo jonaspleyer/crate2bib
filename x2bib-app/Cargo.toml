@@ -1,5 +1,5 @@
 [package]
-name = "crate2bib-app"
+name = "x2bib-app"
 version.workspace = true
 authors = ["Jonas Pleyer <jonas.pleyer@fdm.uni-freiburg.de>"]
 edition = "2021"
@@ -8,7 +8,7 @@ edition = "2021"
 
 [dependencies]
 dioxus = { version = "0.7.10", features = ["router"] }
-crate2bib = { path = "../crate2bib", features = ["log"] }
+x2bib = { path = "../x2bib", features = ["log"] }
 circ_buffer = "0.1.9"
 log.workspace = true
 tracing-log = "0.2.0"

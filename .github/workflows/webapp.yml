@@ -14,7 +14,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: cargo-bins/cargo-binstall@main
       - run: cargo binstall dioxus-cli --no-confirm --version 0.7.10
-      - run: cd crate2bib-app && dx build --release && cd ..
+      - run: cd x2bib-app && dx build --release && cd ..
 
       - name: Configure Github Pages
         uses: actions/configure-pages@v5
@@ -23,7 +23,7 @@ jobs:
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: target/dx/crate2bib-app/release/web/public
+          path: target/dx/x2bib-app/release/web/public
 
   deploy:
     permissions:

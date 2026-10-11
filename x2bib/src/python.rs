@@ -2,7 +2,7 @@ use crate::*;
 
 use pyo3::prelude::*;
 
-/// Wraps the [crate2bib::get_biblatex] function.
+/// Wraps the [x2bib::get_biblatex] function.
 ///
 /// Args:
 ///     crate_name(str): Name of the crate to get BibLaTeX entry
@@ -52,9 +52,9 @@ fn get_biblatex_py(
     })
 }
 
-/// Wrapper of the [crate2bib] crate
+/// Wrapper of the [x2bib] crate
 #[pymodule]
-fn crate2bib(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn x2bib(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_biblatex_py, m)?)?;
     m.add_class::<BibLaTeXCratesIO>()?;
     Ok(())

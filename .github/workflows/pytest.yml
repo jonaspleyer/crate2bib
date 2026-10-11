@@ -33,7 +33,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: develop
-          args: --release -m crate2bib/Cargo.toml
+          args: --release -m x2bib/Cargo.toml
 
       - name: Run Tests
-        run: .venv/bin/python3 -m pytest crate2bib/test/*
+        run: .venv/bin/python3 -m pytest x2bib/test/*

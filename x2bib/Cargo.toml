@@ -1,9 +1,9 @@
 [package]
-name = "crate2bib"
+name = "x2bib"
 version.workspace = true
 edition = "2021"
 license = "MIT OR Apache-2.0"
-description = "Create BibLaTeX entries for crates hosted on crates.io"
+description = "Create BibLaTeX entries from crates.io, PyPI, the Julia registry, DOIs, archive.org and more"
 repository = "https://github.com/jonaspleyer/crate2bib"
 
 [[bin]]
@@ -11,7 +11,7 @@ name = "stub_gen"
 required-features = [ "pyo3" ]
 
 [lib]
-name = "crate2bib"
+name = "x2bib"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]

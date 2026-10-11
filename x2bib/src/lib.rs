@@ -3,6 +3,9 @@
 //!
 //! This crate can be used in a web version under
 //! [jonaspleyer.github.io/crate2bib](https://jonaspleyer.github.io/crate2bib).
+//!
+//! Despite the historic name of the repository, the crate is published as `x2bib` and supports
+//! many more sources than just crates.io (PyPI, the Julia registry, DOIs, archive.org, ...).
 #![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
